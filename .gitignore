@@ -1,0 +1,44 @@
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Gradle and Kotlin
+.gradle/
+.kotlin/
+**/build/
+
+# Local machine configuration
+local.properties
+develop.properties
+
+# Signing keys and passwords
+*.jks
+*.keystore
+keystore.properties
+key.properties
+
+# Native build
+.externalNativeBuild/
+.cxx/
+
+# Generated application packages
+*.apk
+*.aab
+*.ap_
+*.aar
+app/release/
+
+# Profiling and diagnostics
+profile-out*/
+gradle-user-home/
+*.hprof
+*.log
+
+# Android Studio generated files
+captures/
+output.json
+
+# Operating systems
+.DS_Store
+Thumbs.db
