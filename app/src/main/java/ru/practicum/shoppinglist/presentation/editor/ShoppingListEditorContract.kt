@@ -11,6 +11,7 @@ internal object ShoppingListEditorContract {
         val items: List<ShoppingItem> = emptyList(),
         val sort: ShoppingItemSort = ShoppingItemSort.MANUAL,
         val isLoading: Boolean = true,
+        val isDeletingList: Boolean = false,
         val loadError: Message? = null,
         val dialog: Dialog? = null,
         val message: Message? = null,

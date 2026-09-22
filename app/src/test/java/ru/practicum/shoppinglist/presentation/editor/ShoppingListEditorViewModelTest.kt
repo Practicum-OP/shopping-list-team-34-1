@@ -1,5 +1,6 @@
 package ru.practicum.shoppinglist.presentation.editor
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -149,6 +150,31 @@ class ShoppingListEditorViewModelTest {
             assertEquals("Продукты", viewModel.state.value.listName)
         }
 
+    @Test
+    fun `confirmed list deletion blocks further editor actions`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val deletionGate = CompletableDeferred<Unit>()
+            val listInteractor = FakeShoppingListInteractor().apply {
+                deleteGate = deletionGate
+            }
+            val viewModel = createViewModel(listInteractor = listInteractor)
+            advanceUntilIdle()
+
+            viewModel.onIntent(Intent.DeleteListClicked)
+            viewModel.onIntent(Intent.ConfirmDeleteListClicked)
+
+            assertTrue(viewModel.state.value.isDeletingList)
+            assertNull(viewModel.state.value.dialog)
+
+            viewModel.onIntent(Intent.AddItemClicked)
+            assertNull(viewModel.state.value.dialog)
+
+            deletionGate.complete(Unit)
+            advanceUntilIdle()
+
+            assertEquals(listOf(LIST_ID), listInteractor.deletedListIds)
+        }
+
     private fun createViewModel(
         listInteractor: FakeShoppingListInteractor =
             FakeShoppingListInteractor(),
@@ -193,6 +219,8 @@ private class FakeShoppingListInteractor(
 ) : ShoppingListInteractor {
     var failure: Throwable? = null
     var updatedList: ShoppingList? = null
+    var deleteGate: CompletableDeferred<Unit>? = null
+    val deletedListIds = mutableListOf<Long>()
 
     override fun observeShoppingLists(): Flow<List<ShoppingList>> =
         MutableStateFlow(listOfNotNull(listResult))
@@ -214,7 +242,10 @@ private class FakeShoppingListInteractor(
         return true
     }
 
-    override suspend fun deleteShoppingList(listId: Long) = Unit
+    override suspend fun deleteShoppingList(listId: Long) {
+        deleteGate?.await()
+        deletedListIds += listId
+    }
 
     override suspend fun duplicateShoppingList(listId: Long): Long? = null
 }

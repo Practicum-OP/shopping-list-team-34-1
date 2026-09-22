@@ -49,6 +49,8 @@ internal class ShoppingListEditorViewModel(
 
     @Suppress("CyclomaticComplexMethod")
     fun onIntent(intent: Intent) {
+        if (_state.value.isDeletingList) return
+
         when (intent) {
             Intent.AddItemClicked -> _state.showItemForm()
             is Intent.EditItemClicked -> _state.showItemForm(intent.item)
@@ -248,7 +250,12 @@ internal class ShoppingListEditorViewModel(
 
     private fun deleteList() {
         if (_state.value.dialog !is Dialog.DeleteList) return
-        _state.dismissDialog()
+        _state.update { state ->
+            state.copy(
+                dialog = null,
+                isDeletingList = true,
+            )
+        }
         viewModelScope.launch {
             runCatching {
                 shoppingListInteractor.deleteShoppingList(listId)
@@ -256,6 +263,7 @@ internal class ShoppingListEditorViewModel(
                 sortStorage.remove(listId)
                 effectChannel.send(Effect.NavigateBack)
             }.onFailure {
+                _state.update { state -> state.copy(isDeletingList = false) }
                 _state.showMessage(Message.SAVE_FAILED)
             }
         }

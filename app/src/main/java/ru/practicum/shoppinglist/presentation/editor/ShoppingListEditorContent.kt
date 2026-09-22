@@ -1,5 +1,6 @@
 package ru.practicum.shoppinglist.presentation.editor
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,19 +60,30 @@ internal fun ShoppingListEditorContent(
     onBack: () -> Unit,
     onIntent: (Intent) -> Unit,
 ) {
+    val canEdit = !state.isLoading &&
+        !state.isDeletingList &&
+        state.loadError == null &&
+        state.listName.isNotBlank()
+
+    BackHandler(enabled = state.isDeletingList) {
+        // Keep the screen alive until the confirmed Room deletion finishes.
+    }
+
     Scaffold(
         topBar = {
             EditorTopBar(
                 listName = state.listName,
                 sort = state.sort,
                 hasPurchasedItems = state.items.any(ShoppingItem::isPurchased),
+                backEnabled = !state.isDeletingList,
+                actionsEnabled = canEdit,
                 onBack = onBack,
                 onIntent = onIntent,
             )
         },
         snackbarHost = snackbarHost,
         floatingActionButton = {
-            if (!state.isLoading && state.listName.isNotBlank()) {
+            if (canEdit) {
                 ExtendedFloatingActionButton(
                     onClick = { onIntent(Intent.AddItemClicked) },
                     icon = {
@@ -104,6 +116,8 @@ private fun EditorTopBar(
     listName: String,
     sort: ShoppingItemSort,
     hasPurchasedItems: Boolean,
+    backEnabled: Boolean,
+    actionsEnabled: Boolean,
     onBack: () -> Unit,
     onIntent: (Intent) -> Unit,
 ) {
@@ -115,7 +129,10 @@ private fun EditorTopBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBack) {
+            IconButton(
+                enabled = backEnabled,
+                onClick = onBack,
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.editor_back),
@@ -123,7 +140,7 @@ private fun EditorTopBar(
             }
         },
         actions = {
-            if (listName.isNotBlank()) {
+            if (actionsEnabled) {
                 SortMenu(sort = sort, onIntent = onIntent)
                 ListActionsMenu(
                     hasPurchasedItems = hasPurchasedItems,
@@ -254,7 +271,7 @@ private fun EditorBody(
     onIntent: (Intent) -> Unit,
 ) {
     when {
-        state.isLoading -> LoadingContent(contentPadding)
+        state.isLoading || state.isDeletingList -> LoadingContent(contentPadding)
         state.loadError != null -> ShoppingListEditorErrorContent(
             error = state.loadError,
             contentPadding = contentPadding,
