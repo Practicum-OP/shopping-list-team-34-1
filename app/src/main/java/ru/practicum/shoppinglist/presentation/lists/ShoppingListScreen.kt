@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
@@ -13,21 +12,15 @@ import ru.practicum.shoppinglist.R
 
 @Composable
 internal fun ShoppingListsScreen(
-    onOpenList: (Long) -> Unit,
     viewModel: ShoppingListsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val operationFailedMessage = stringResource(R.string.lists_operation_failed)
-    val currentOnOpenList by rememberUpdatedState(onOpenList)
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is ShoppingListsEffect.OpenList -> {
-                    currentOnOpenList(effect.listId)
-                }
-
                 ShoppingListsEffect.OperationFailed -> {
                     snackbarHostState.showSnackbar(operationFailedMessage)
                 }

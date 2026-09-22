@@ -11,10 +11,13 @@
     <string name="lists_name_label">Название</string>
     <string name="lists_name_required">Введите название списка</string>
     <string name="lists_choose_icon">Выберите иконку</string>
+    <string name="lists_rename_content_description">Переименовать список «%1$s»</string>
+    <string name="lists_rename_dialog_title">Изменить список</string>
     <string name="lists_delete_content_description">Удалить список «%1$s»</string>
     <string name="lists_delete_dialog_title">Удалить список?</string>
     <string name="lists_delete_dialog_body">Список «%1$s» и все его товары будут удалены.</string>
     <string name="action_create">Создать</string>
+    <string name="action_save">Сохранить</string>
     <string name="action_delete">Удалить</string>
     <string name="action_cancel">Отмена</string>
     <string name="list_icon_cart">Покупки</string>

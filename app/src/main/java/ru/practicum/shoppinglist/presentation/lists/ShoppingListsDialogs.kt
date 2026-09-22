@@ -34,6 +34,8 @@ import ru.practicum.shoppinglist.domain.api.model.ShoppingList
 
 private const val CREATE_DIALOG_TEST_TAG = "create_list_dialog"
 private const val CREATE_NAME_TEST_TAG = "create_list_name"
+private const val RENAME_DIALOG_TEST_TAG = "rename_list_dialog"
+private const val RENAME_NAME_TEST_TAG = "rename_list_name"
 private const val DELETE_DIALOG_TEST_TAG = "delete_list_dialog"
 
 @Composable
@@ -47,10 +49,19 @@ internal fun CreateListDialog(
         onDismissRequest = { onAction(ShoppingListsAction.CreateDialogDismissed) },
         title = { Text(stringResource(R.string.lists_create_dialog_title)) },
         text = {
-            CreateListForm(
-                state = state,
+            ListForm(
+                name = state.name,
+                iconKey = state.iconKey,
+                showNameError = state.showNameError,
                 isSubmitting = isSubmitting,
-                onAction = onAction,
+                nameTestTag = CREATE_NAME_TEST_TAG,
+                onNameChanged = {
+                    onAction(ShoppingListsAction.CreateNameChanged(it))
+                },
+                onIconSelected = {
+                    onAction(ShoppingListsAction.CreateIconSelected(it))
+                },
+                onConfirmed = { onAction(ShoppingListsAction.CreateConfirmed) },
             )
         },
         confirmButton = {
@@ -73,22 +84,27 @@ internal fun CreateListDialog(
 }
 
 @Composable
-private fun CreateListForm(
-    state: CreateListDialogState,
+private fun ListForm(
+    name: String,
+    iconKey: String,
+    showNameError: Boolean,
     isSubmitting: Boolean,
-    onAction: (ShoppingListsAction) -> Unit,
+    nameTestTag: String,
+    onNameChanged: (String) -> Unit,
+    onIconSelected: (String) -> Unit,
+    onConfirmed: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag(CREATE_NAME_TEST_TAG),
-            value = state.name,
+                .testTag(nameTestTag),
+            value = name,
             enabled = !isSubmitting,
-            onValueChange = { onAction(ShoppingListsAction.CreateNameChanged(it)) },
+            onValueChange = onNameChanged,
             label = { Text(stringResource(R.string.lists_name_label)) },
-            isError = state.showNameError,
-            supportingText = if (state.showNameError) {
+            isError = showNameError,
+            supportingText = if (showNameError) {
                 { Text(stringResource(R.string.lists_name_required)) }
             } else {
                 null
@@ -96,7 +112,7 @@ private fun CreateListForm(
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(
-                onDone = { onAction(ShoppingListsAction.CreateConfirmed) },
+                onDone = { onConfirmed() },
             ),
         )
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -105,14 +121,57 @@ private fun CreateListForm(
                 style = MaterialTheme.typography.labelLarge,
             )
             IconPicker(
-                selectedIconKey = state.iconKey,
+                selectedIconKey = iconKey,
                 enabled = !isSubmitting,
-                onIconSelected = {
-                    onAction(ShoppingListsAction.CreateIconSelected(it))
-                },
+                onIconSelected = onIconSelected,
             )
         }
     }
+}
+
+@Composable
+internal fun RenameListDialog(
+    state: RenameListDialogState,
+    isSubmitting: Boolean,
+    onAction: (ShoppingListsAction) -> Unit,
+) {
+    AlertDialog(
+        modifier = Modifier.testTag(RENAME_DIALOG_TEST_TAG),
+        onDismissRequest = { onAction(ShoppingListsAction.RenameDialogDismissed) },
+        title = { Text(stringResource(R.string.lists_rename_dialog_title)) },
+        text = {
+            ListForm(
+                name = state.name,
+                iconKey = state.iconKey,
+                showNameError = state.showNameError,
+                isSubmitting = isSubmitting,
+                nameTestTag = RENAME_NAME_TEST_TAG,
+                onNameChanged = {
+                    onAction(ShoppingListsAction.RenameNameChanged(it))
+                },
+                onIconSelected = {
+                    onAction(ShoppingListsAction.RenameIconSelected(it))
+                },
+                onConfirmed = { onAction(ShoppingListsAction.RenameConfirmed) },
+            )
+        },
+        confirmButton = {
+            DialogConfirmButton(
+                label = stringResource(R.string.action_save),
+                isSubmitting = isSubmitting,
+                isActionEnabled = state.name.isNotBlank(),
+                onClick = { onAction(ShoppingListsAction.RenameConfirmed) },
+            )
+        },
+        dismissButton = {
+            TextButton(
+                enabled = !isSubmitting,
+                onClick = { onAction(ShoppingListsAction.RenameDialogDismissed) },
+            ) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        },
+    )
 }
 
 @Composable

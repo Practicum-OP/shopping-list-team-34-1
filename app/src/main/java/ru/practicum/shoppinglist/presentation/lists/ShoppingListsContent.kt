@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -71,6 +72,14 @@ internal fun ShoppingListsContent(
 
     state.createDialog?.let { dialogState ->
         CreateListDialog(
+            state = dialogState,
+            isSubmitting = state.isSubmitting,
+            onAction = onAction,
+        )
+    }
+
+    state.renameDialog?.let { dialogState ->
+        RenameListDialog(
             state = dialogState,
             isSubmitting = state.isSubmitting,
             onAction = onAction,
@@ -211,7 +220,7 @@ private fun ShoppingLists(
         items(items = shoppingLists, key = ShoppingList::id) { shoppingList ->
             ShoppingListCard(
                 shoppingList = shoppingList,
-                onClick = { onAction(ShoppingListsAction.ListClicked(shoppingList.id)) },
+                onRename = { onAction(ShoppingListsAction.RenameListClicked(shoppingList)) },
                 onDelete = { onAction(ShoppingListsAction.DeleteListClicked(shoppingList)) },
             )
         }
@@ -221,13 +230,12 @@ private fun ShoppingLists(
 @Composable
 private fun ShoppingListCard(
     shoppingList: ShoppingList,
-    onClick: () -> Unit,
+    onRename: () -> Unit,
     onDelete: () -> Unit,
 ) {
     val icon = ShoppingListIconRegistry.resolve(shoppingList.iconKey)
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -259,16 +267,41 @@ private fun ShoppingListCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = stringResource(
-                        R.string.lists_delete_content_description,
-                        shoppingList.name,
-                    ),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            ListActions(
+                listName = shoppingList.name,
+                onRename = onRename,
+                onDelete = onDelete,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListActions(
+    listName: String,
+    onRename: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    Row {
+        IconButton(onClick = onRename) {
+            Icon(
+                imageVector = Icons.Outlined.Edit,
+                contentDescription = stringResource(
+                    R.string.lists_rename_content_description,
+                    listName,
+                ),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        IconButton(onClick = onDelete) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = stringResource(
+                    R.string.lists_delete_content_description,
+                    listName,
+                ),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

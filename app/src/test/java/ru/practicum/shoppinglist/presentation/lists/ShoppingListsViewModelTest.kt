@@ -66,6 +66,25 @@ class ShoppingListsViewModelTest {
         }
 
     @Test
+    fun `list is renamed with trimmed name and selected icon`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val interactor = FakeShoppingListInteractor()
+            val viewModel = ShoppingListsViewModel(interactor)
+            val list = shoppingList(id = 9, name = "Old name")
+            advanceUntilIdle()
+
+            viewModel.onAction(ShoppingListsAction.RenameListClicked(list))
+            viewModel.onAction(ShoppingListsAction.RenameNameChanged("  Weekend  "))
+            viewModel.onAction(ShoppingListsAction.RenameIconSelected("home"))
+            viewModel.onAction(ShoppingListsAction.RenameConfirmed)
+            advanceUntilIdle()
+
+            assertEquals("Weekend", interactor.updatedList?.name)
+            assertEquals("home", interactor.updatedList?.iconKey)
+            assertNull(viewModel.state.value.renameDialog)
+        }
+
+    @Test
     fun `delete cancellation leaves data unchanged and confirmation deletes`() =
         runTest(mainDispatcherRule.testDispatcher) {
             val interactor = FakeShoppingListInteractor()
@@ -101,6 +120,7 @@ private class FakeShoppingListInteractor(
     var createCalls = 0
     var lastCreatedName: String? = null
     var lastCreatedIconKey: String? = null
+    var updatedList: ShoppingList? = null
     val deletedIds = mutableListOf<Long>()
 
     override fun observeShoppingLists(): Flow<List<ShoppingList>> = lists
@@ -115,7 +135,10 @@ private class FakeShoppingListInteractor(
         return 42L
     }
 
-    override suspend fun updateShoppingList(shoppingList: ShoppingList): Boolean = true
+    override suspend fun updateShoppingList(shoppingList: ShoppingList): Boolean {
+        updatedList = shoppingList
+        return true
+    }
 
     override suspend fun deleteShoppingList(listId: Long) {
         deletedIds += listId

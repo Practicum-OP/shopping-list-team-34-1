@@ -36,9 +36,19 @@ internal class ShoppingListsViewModel(
             is ShoppingListsAction.CreateNameChanged -> changeCreateName(action.name)
             is ShoppingListsAction.CreateIconSelected -> selectCreateIcon(action.iconKey)
             ShoppingListsAction.CreateConfirmed -> createList()
-            is ShoppingListsAction.ListClicked -> if (action.listId > 0) {
-                effectChannel.trySend(ShoppingListsEffect.OpenList(action.listId))
+            is ShoppingListsAction.RenameListClicked -> {
+                mutableState.showRenameDialog(action.shoppingList)
             }
+            ShoppingListsAction.RenameDialogDismissed -> {
+                mutableState.dismissRenameDialog()
+            }
+            is ShoppingListsAction.RenameNameChanged -> {
+                mutableState.changeRenameName(action.name)
+            }
+            is ShoppingListsAction.RenameIconSelected -> {
+                mutableState.selectRenameIcon(action.iconKey)
+            }
+            ShoppingListsAction.RenameConfirmed -> renameList()
             is ShoppingListsAction.DeleteListClicked -> requestDeletion(action.shoppingList)
             ShoppingListsAction.DeleteDialogDismissed -> dismissDeleteDialog()
             ShoppingListsAction.DeleteConfirmed -> deleteList()
@@ -114,6 +124,38 @@ internal class ShoppingListsViewModel(
         }
     }
 
+    private fun renameList() {
+        val currentState = mutableState.value
+        val dialog = currentState.renameDialog
+        if (currentState.isSubmitting || dialog == null) return
+        val preparedName = dialog.name.trim()
+        if (preparedName.isEmpty()) {
+            mutableState.update { state ->
+                state.copy(renameDialog = dialog.copy(showNameError = true))
+            }
+            return
+        }
+
+        mutableState.update { state -> state.copy(isSubmitting = true) }
+        viewModelScope.launch {
+            val updatedList = dialog.shoppingList.copy(
+                name = preparedName,
+                iconKey = dialog.iconKey,
+            )
+            runCatching { interactor.updateShoppingList(updatedList) }
+                .onSuccess { isUpdated ->
+                    if (isUpdated) {
+                        mutableState.update { state ->
+                            state.copy(renameDialog = null, isSubmitting = false)
+                        }
+                    } else {
+                        onOperationFailed()
+                    }
+                }
+                .onFailure { onOperationFailed() }
+        }
+    }
+
     private fun requestDeletion(shoppingList: ShoppingList) {
         mutableState.update { state -> state.copy(listPendingDeletion = shoppingList) }
     }
@@ -149,4 +191,34 @@ private inline fun MutableStateFlow<ShoppingListsUiState>.updateUnlessSubmitting
     transform: (ShoppingListsUiState) -> ShoppingListsUiState,
 ) {
     update { state -> if (state.isSubmitting) state else transform(state) }
+}
+
+private fun MutableStateFlow<ShoppingListsUiState>.showRenameDialog(
+    shoppingList: ShoppingList,
+) {
+    update { state ->
+        state.copy(renameDialog = RenameListDialogState(shoppingList))
+    }
+}
+
+private fun MutableStateFlow<ShoppingListsUiState>.dismissRenameDialog() {
+    updateUnlessSubmitting { state -> state.copy(renameDialog = null) }
+}
+
+private fun MutableStateFlow<ShoppingListsUiState>.changeRenameName(name: String) {
+    update { state ->
+        state.copy(
+            renameDialog = state.renameDialog?.copy(
+                name = name,
+                showNameError = false,
+            ),
+        )
+    }
+}
+
+private fun MutableStateFlow<ShoppingListsUiState>.selectRenameIcon(iconKey: String) {
+    val knownIconKey = ShoppingListIconRegistry.resolve(iconKey).key
+    update { state ->
+        state.copy(renameDialog = state.renameDialog?.copy(iconKey = knownIconKey))
+    }
 }
