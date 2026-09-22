@@ -30,6 +30,11 @@ internal interface ShoppingItemDao {
     suspend fun getNextPosition(listId: Long): Int
 
     @Insert
+    suspend fun insertAll(
+        shoppingItems: List<ShoppingItemEntity>,
+    )
+
+    @Insert
     suspend fun insert(shoppingItem: ShoppingItemEntity): Long
 
     @Update
