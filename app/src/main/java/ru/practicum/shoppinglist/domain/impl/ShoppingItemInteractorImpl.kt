@@ -48,7 +48,7 @@ internal class ShoppingItemInteractorImpl(
             listId = listId,
             name = preparedName,
             quantity = quantity,
-            unit = unit.takeIf { quantity != null },
+            unit = unit,
         )
     }
 
@@ -68,9 +68,6 @@ internal class ShoppingItemInteractorImpl(
         repository.updateShoppingItem(
             shoppingItem.copy(
                 name = preparedName,
-                unit = shoppingItem.unit.takeIf {
-                    shoppingItem.quantity != null
-                },
             ),
         )
 

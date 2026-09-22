@@ -21,8 +21,8 @@ internal fun ShoppingListNavHost() {
     ) {
         composable(route = AppRoute.SHOPPING_LISTS) {
             ShoppingListsScreen(
-                onCreateList = {
-                    navController.navigate(AppRoute.listEditor())
+                onOpenList = { listId ->
+                    navController.navigate(AppRoute.listEditor(listId))
                 },
             )
         }

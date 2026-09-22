@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lists_title">Списки покупок</string>
+    <string name="lists_create">Новый список</string>
+    <string name="lists_empty_title">Списков пока нет</string>
+    <string name="lists_empty_body">Создайте первый список и добавьте в него всё необходимое</string>
+    <string name="lists_load_failed_title">Не удалось загрузить списки</string>
+    <string name="lists_load_failed_body">Закройте и снова откройте экран</string>
+    <string name="lists_operation_failed">Не удалось сохранить изменения</string>
+    <string name="lists_create_dialog_title">Новый список</string>
+    <string name="lists_name_label">Название</string>
+    <string name="lists_name_required">Введите название списка</string>
+    <string name="lists_choose_icon">Выберите иконку</string>
+    <string name="lists_delete_content_description">Удалить список «%1$s»</string>
+    <string name="lists_delete_dialog_title">Удалить список?</string>
+    <string name="lists_delete_dialog_body">Список «%1$s» и все его товары будут удалены.</string>
+    <string name="action_create">Создать</string>
+    <string name="action_delete">Удалить</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="list_icon_cart">Покупки</string>
+    <string name="list_icon_food">Продукты</string>
+    <string name="list_icon_home">Для дома</string>
+    <string name="list_icon_pets">Для питомцев</string>
+    <string name="list_icon_party">Праздник</string>
+    <string name="list_icon_favorite">Избранное</string>
+</resources>
