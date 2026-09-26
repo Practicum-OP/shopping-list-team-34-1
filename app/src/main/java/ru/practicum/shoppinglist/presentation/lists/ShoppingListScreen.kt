@@ -1,36 +1,36 @@
 package ru.practicum.shoppinglist.presentation.lists
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.androidx.compose.koinViewModel
+import ru.practicum.shoppinglist.R
 
 @Composable
 internal fun ShoppingListsScreen(
-    onCreateList: () -> Unit,
+    viewModel: ShoppingListsViewModel = koinViewModel(),
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(text = "Списков пока нет")
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val operationFailedMessage = stringResource(R.string.lists_operation_failed)
 
-        Button(
-            modifier = Modifier.padding(top = 16.dp),
-            onClick = onCreateList,
-        ) {
-            Text(text = "Создать список")
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                ShoppingListsEffect.OperationFailed -> {
+                    snackbarHostState.showSnackbar(operationFailedMessage)
+                }
+            }
         }
     }
+
+    ShoppingListsContent(
+        state = state,
+        snackbarHostState = snackbarHostState,
+        onAction = viewModel::onAction,
+    )
 }
