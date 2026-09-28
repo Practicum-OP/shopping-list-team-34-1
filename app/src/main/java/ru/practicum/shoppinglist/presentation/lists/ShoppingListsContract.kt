@@ -43,4 +43,5 @@ internal sealed interface ShoppingListsAction {
 
 internal sealed interface ShoppingListsEffect {
     data object OperationFailed : ShoppingListsEffect
+    data object NavigateToList : ShoppingListsEffect
 }

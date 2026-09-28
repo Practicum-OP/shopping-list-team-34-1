@@ -4,6 +4,7 @@ import android.app.Application
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import ru.practicum.shoppinglist.di.appModule
+import ru.practicum.shoppinglist.presentation.editor.editorModule
 import ru.practicum.shoppinglist.presentation.lists.listsModule
 
 class ShoppingListApplication : Application() {
@@ -16,6 +17,7 @@ class ShoppingListApplication : Application() {
             modules(
                 appModule,
                 listsModule,
+                editorModule
             )
         }
     }
