@@ -75,7 +75,9 @@ internal class ListEditorViewModel(
                 createDialog = CreateItemDialogState(
                     name = item.name,
                     quantity = item.quantity?.toInt() ?: 1,
-                    selectedUnit = item.unit ?: MeasurementUnit.PIECE
+                    selectedUnit = item.unit ?: MeasurementUnit.PIECE,
+                    isEditing = true,
+                    id = item.id
                 )
             )
         }
@@ -174,6 +176,7 @@ internal class ListEditorViewModel(
 
     private fun handleConfirmAddItem() {
         val dialog = mutableState.value.createDialog ?: return
+        val item = mutableState.value.items.find { it.id == dialog.id } ?: return
 
         val hasNameError = dialog.name.isBlank()
         val hasQuantityError = dialog.quantity <= 0
@@ -189,8 +192,11 @@ internal class ListEditorViewModel(
             }
             return
         }
-
-        addItem(dialog.name, dialog.quantity, dialog.selectedUnit)
+        if (!dialog.isEditing) {
+            addItem(dialog.name, dialog.quantity, dialog.selectedUnit)
+        } else {
+            editItem(item.copy(name = dialog.name, quantity = dialog.quantity.toDouble(), unit = dialog.selectedUnit))
+        }
     }
 
     private fun addItem(name: String, quantity: Int, unit: MeasurementUnit) {
@@ -221,7 +227,7 @@ internal class ListEditorViewModel(
             runCatching {
                 interactor.updateShoppingItem(item)
             }.onSuccess {
-                mutableState.update { state -> state.copy(isSubmitting = false) }
+                mutableState.update { state -> state.copy(createDialog = null, isSubmitting = false) }
             }.onFailure {
                 mutableState.update { state -> state.copy(isSubmitting = false) }
                 effectChannel.trySend(ListEditorEffect.OperationFailed)

@@ -9,10 +9,12 @@
 
     <string name="editor_create">Создать</string>
     <string name="action_add">Добавить</string>
+    <string name="action_edit">Изменить</string>
 
     <string name="action_yes">Да</string>
 
     <string name="editor_create_dialog_title">Новый товар</string>
+    <string name="editor_edit_dialog_title">Редактировать</string>
     <string name="editor_name_label">Название</string>
     <string name="editor_name_required">Введите название товара</string>
     <string name="editor_quantity_label">Количество</string>

@@ -5,12 +5,14 @@ import ru.practicum.shoppinglist.domain.api.model.ShoppingItem
 import ru.practicum.shoppinglist.domain.api.model.ShoppingItemSort
 
 internal data class CreateItemDialogState(
+    val id: Long? = null,
     val name: String = "",
     val quantity: Int = 1,
     val selectedUnit: MeasurementUnit = MeasurementUnit.PIECE,
     val showNameError: Boolean = false,
     val showQuantityError: Boolean = false,
-    val suggestions: List<String> = emptyList()
+    val suggestions: List<String> = emptyList(),
+    val isEditing: Boolean = false
 )
 
 internal data class ListEditorUiState(

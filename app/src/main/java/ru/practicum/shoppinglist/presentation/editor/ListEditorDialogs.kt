@@ -41,6 +41,8 @@ internal fun CreateItemBottomSheet(
     isSubmitting: Boolean,
     onDismiss: () -> Unit,
     onIntent: (ListEditorIntent) -> Unit,
+    isEditing: Boolean,
+
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -57,7 +59,7 @@ internal fun CreateItemBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = stringResource(R.string.editor_create_dialog_title),
+                text = stringResource(if (!isEditing)R.string.editor_create_dialog_title else R.string.editor_edit_dialog_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = OnSurfaceColor,
                 modifier = Modifier.padding(bottom = 8.dp),
@@ -73,12 +75,15 @@ internal fun CreateItemBottomSheet(
                 onNameChanged = { onIntent(ListEditorIntent.NameChanged(it)) },
                 onQuantityChanged = { onIntent(ListEditorIntent.QuantityChanged(it)) },
                 onUnitChanged = { onIntent(ListEditorIntent.UnitChanged(it)) },
-                onDone = { onIntent(ListEditorIntent.ConfirmAddItem) },
+                onDone = { onIntent(ListEditorIntent.ConfirmAddItem) }
+
             )
             Button(
                 onClick = { onIntent(ListEditorIntent.ConfirmAddItem) },
                 enabled = !isSubmitting && state.name.isNotBlank() && state.quantity > 0,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PrimaryContainerColor,
                     contentColor = OnPrimaryContainerColor,
@@ -92,10 +97,17 @@ internal fun CreateItemBottomSheet(
                         color = OnPrimaryContainerColor,
                     )
                 } else {
-                    Text(text = stringResource(R.string.action_add), style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        text = stringResource(if (!isEditing)R.string.action_add else R.string.action_edit),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+            Spacer(
+                modifier = Modifier.height(
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                )
+            )
         }
     }
 }
@@ -117,13 +129,17 @@ private fun ItemForm(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().testTag(nameTestTag),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(nameTestTag),
             value = name,
             enabled = !isSubmitting,
             onValueChange = onNameChanged,
             label = { Text(stringResource(R.string.editor_name_label)) },
             isError = showNameError,
-            supportingText = if (showNameError) { { Text(stringResource(R.string.editor_name_required)) } } else null,
+            supportingText = if (showNameError) {
+                { Text(stringResource(R.string.editor_name_required)) }
+            } else null,
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { onDone() }),
@@ -138,7 +154,9 @@ private fun ItemForm(
             },
             label = { Text(stringResource(R.string.editor_quantity_label)) },
             isError = showQuantityError,
-            supportingText = if (showQuantityError) { { Text(stringResource(R.string.editor_quantity_required)) } } else null,
+            supportingText = if (showQuantityError) {
+                { Text(stringResource(R.string.editor_quantity_required)) }
+            } else null,
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
         )
@@ -151,7 +169,9 @@ private fun ItemForm(
                 enabled = !isSubmitting,
                 label = { Text(stringResource(R.string.editor_unit_label)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable),
             )
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 enumValues<MeasurementUnit>().forEach { unit ->
@@ -176,8 +196,18 @@ internal fun DeleteItemDialog(
         onDismissRequest = { onIntent(ListEditorIntent.DeleteCancelled) },
         containerColor = DialogBackgroundColor,
         shape = MaterialTheme.shapes.extraLarge,
-        title = { Text(text = stringResource(R.string.editor_delete_dialog_title), color = OnSurfaceColor) },
-        text = { Text(text = stringResource(R.string.editor_delete_dialog_body, shoppingItem.name), color = OnSurfaceVariantColor) },
+        title = {
+            Text(
+                text = stringResource(R.string.editor_delete_dialog_title),
+                color = OnSurfaceColor
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.editor_delete_dialog_body, shoppingItem.name),
+                color = OnSurfaceVariantColor
+            )
+        },
         confirmButton = {
             DialogConfirmButton(
                 label = stringResource(R.string.action_delete),
@@ -209,8 +239,18 @@ internal fun ClearListDialog(
         onDismissRequest = { onIntent(ListEditorIntent.ClearCancelled) },
         containerColor = DialogBackgroundColor,
         shape = MaterialTheme.shapes.extraLarge,
-        title = { Text(text = stringResource(R.string.editor_clear_dialog_title), color = OnSurfaceColor) },
-        text = { Text(text = stringResource(R.string.editor_clear_dialog_body), color = OnSurfaceVariantColor) },
+        title = {
+            Text(
+                text = stringResource(R.string.editor_clear_dialog_title),
+                color = OnSurfaceColor
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.editor_clear_dialog_body),
+                color = OnSurfaceVariantColor
+            )
+        },
         confirmButton = {
             DialogConfirmButton(
                 label = stringResource(R.string.action_yes),
