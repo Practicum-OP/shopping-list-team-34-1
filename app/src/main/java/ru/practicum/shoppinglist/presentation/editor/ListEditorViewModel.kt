@@ -176,7 +176,6 @@ internal class ListEditorViewModel(
 
     private fun handleConfirmAddItem() {
         val dialog = mutableState.value.createDialog ?: return
-        val item = mutableState.value.items.find { it.id == dialog.id } ?: return
 
         val hasNameError = dialog.name.isBlank()
         val hasQuantityError = dialog.quantity <= 0
@@ -186,36 +185,68 @@ internal class ListEditorViewModel(
                 state.copy(
                     createDialog = dialog.copy(
                         showNameError = hasNameError,
-                        showQuantityError = hasQuantityError
-                    )
+                        showQuantityError = hasQuantityError,
+                    ),
                 )
             }
             return
         }
-        if (!dialog.isEditing) {
-            addItem(dialog.name, dialog.quantity, dialog.selectedUnit)
+
+        if (dialog.isEditing) {
+            val itemId = dialog.id ?: return
+            val item = mutableState.value.items.find { it.id == itemId }
+                ?: return
+
+            editItem(
+                item.copy(
+                    name = dialog.name,
+                    quantity = dialog.quantity.toDouble(),
+                    unit = dialog.selectedUnit,
+                ),
+            )
         } else {
-            editItem(item.copy(name = dialog.name, quantity = dialog.quantity.toDouble(), unit = dialog.selectedUnit))
+            addItem(
+                name = dialog.name,
+                quantity = dialog.quantity,
+                unit = dialog.selectedUnit,
+            )
         }
     }
 
-    private fun addItem(name: String, quantity: Int, unit: MeasurementUnit) {
-        if (name.isBlank() || quantity <= 0) return
-        mutableState.update { state -> state.copy(isSubmitting = true) }
+    private fun addItem(
+        name: String,
+        quantity: Int,
+        unit: MeasurementUnit,
+    ) {
+        if (name.isBlank() || quantity <= 0) {
+            return
+        }
+
+        mutableState.update { state ->
+            state.copy(isSubmitting = true)
+        }
+
         viewModelScope.launch {
-            runCatching {
+            val itemId = runCatching {
                 interactor.addShoppingItem(
                     listId = listId,
                     name = name,
                     quantity = quantity.toDouble(),
-                    unit = unit
+                    unit = unit,
                 )
-            }.onSuccess {
+            }.getOrNull()
+
+            if (itemId != null) {
                 mutableState.update { state ->
-                    state.copy(createDialog = null, isSubmitting = false)
+                    state.copy(
+                        createDialog = null,
+                        isSubmitting = false,
+                    )
                 }
-            }.onFailure {
-                mutableState.update { state -> state.copy(isSubmitting = false) }
+            } else {
+                mutableState.update { state ->
+                    state.copy(isSubmitting = false)
+                }
                 effectChannel.trySend(ListEditorEffect.OperationFailed)
             }
         }
