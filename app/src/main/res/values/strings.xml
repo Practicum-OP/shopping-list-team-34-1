@@ -1,3 +1,46 @@
 <resources>
     <string name="app_name">Список покупок</string>
+
+    <string name="editor_title">Список</string>
+    <string name="editor_operation_failed">Операция не удалась</string>
+
+    <string name="editor_empty_title">В списке покупок пока пусто</string>
+    <string name="editor_empty_subtitle">Нажмите на кнопку + ниже, чтобы добавить товары</string>
+
+    <string name="editor_create">Создать</string>
+    <string name="action_add">Добавить</string>
+    <string name="action_edit">Изменить</string>
+
+    <string name="action_yes">Да</string>
+
+    <string name="editor_create_dialog_title">Новый товар</string>
+    <string name="editor_edit_dialog_title">Редактировать</string>
+    <string name="editor_name_label">Название</string>
+    <string name="editor_name_required">Введите название товара</string>
+    <string name="editor_quantity_label">Количество</string>
+    <string name="editor_quantity_required">Введите количество</string>
+
+    <string name="editor_delete_dialog_title">Удалить товар?</string>
+    <string name="editor_delete_dialog_body">Вы уверены, что хотите удалить \"%s\"?</string>
+
+    <string name="editor_clear_dialog_title">Очистить список?</string>
+    <string name="editor_clear_dialog_body">Вы уверены, что хотите удалить все товары из этого списка?</string>
+    <string name="navigate_back">Назад</string>
+
+
+    <string name="editor_unit_label">Ед. изм.</string>
+    <string name="unit_piece_short">шт</string>
+    <string name="unit_kilogram_short">кг</string>
+    <string name="unit_liter_short">л</string>
+    <string name="unit_milliliter_short">мл</string>
+    <string name="unit_gram_short">г</string>
+
+    <string name="item_purchased">Товар куплен</string>
+    <string name="item_not_purchased">Товар не куплен</string>
+    <string name="drag_handle">Перетащить</string>
+    <string name="menu">Меню</string>
+
+    <string name="sort_manual">Ручная сортировка</string>
+    <string name="sort_alphabetical">По алфавиту</string>
+
 </resources>

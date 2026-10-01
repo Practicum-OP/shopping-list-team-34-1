@@ -1,4 +1,4 @@
-package ru.practicum.shoppinglist.presentation.lists
+package ru.practicum.shoppinglist.presentation.editor
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -11,30 +11,32 @@ import org.koin.androidx.compose.koinViewModel
 import ru.practicum.shoppinglist.R
 
 @Composable
-internal fun ShoppingListsScreen(
-    viewModel: ShoppingListsViewModel = koinViewModel(),
-    onListClick: (Long, String) -> Unit = { _, _ -> },
-
-    ) {
+internal fun ListEditorScreen(
+    viewModel: ListEditorViewModel = koinViewModel(),
+    onNavigateBack: () -> Unit = {},
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val operationFailedMessage = stringResource(R.string.lists_operation_failed)
+    val operationFailedMessage = stringResource(R.string.editor_operation_failed)
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                ShoppingListsEffect.OperationFailed -> {
+                ListEditorEffect.OperationFailed -> {
                     snackbarHostState.showSnackbar(operationFailedMessage)
                 }
-                ShoppingListsEffect.NavigateToList -> onListClick
+
+                ListEditorEffect.NavigateBack -> {
+                    onNavigateBack()
+                }
             }
         }
     }
 
-    ShoppingListsContent(
+    ListEditorContent(
         state = state,
         snackbarHostState = snackbarHostState,
-        onAction = viewModel::onAction,
-        onItemClick = onListClick
+        onIntent = viewModel::onIntent,
+        onNavigateBack = onNavigateBack,
     )
 }

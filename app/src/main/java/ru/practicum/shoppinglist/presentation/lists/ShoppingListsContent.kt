@@ -54,6 +54,7 @@ internal fun ShoppingListsContent(
     state: ShoppingListsUiState,
     snackbarHostState: SnackbarHostState,
     onAction: (ShoppingListsAction) -> Unit,
+    onItemClick: (listId: Long, listName: String) -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -67,6 +68,7 @@ internal fun ShoppingListsContent(
             state = state,
             contentPadding = contentPadding,
             onAction = onAction,
+            onItemClick = onItemClick
         )
     }
 
@@ -139,6 +141,7 @@ private fun ListsBody(
     state: ShoppingListsUiState,
     contentPadding: PaddingValues,
     onAction: (ShoppingListsAction) -> Unit,
+    onItemClick: (listId: Long, listName: String) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -165,6 +168,7 @@ private fun ListsBody(
             else -> ShoppingLists(
                 shoppingLists = state.lists,
                 onAction = onAction,
+                onItemClick = onItemClick
             )
         }
     }
@@ -211,6 +215,7 @@ private fun ListsMessage(title: String, body: String) {
 private fun ShoppingLists(
     shoppingLists: List<ShoppingList>,
     onAction: (ShoppingListsAction) -> Unit,
+    onItemClick: (listId: Long, listName: String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -222,6 +227,7 @@ private fun ShoppingLists(
                 shoppingList = shoppingList,
                 onRename = { onAction(ShoppingListsAction.RenameListClicked(shoppingList)) },
                 onDelete = { onAction(ShoppingListsAction.DeleteListClicked(shoppingList)) },
+                onItemClick = { onItemClick(shoppingList.id, shoppingList.name) }
             )
         }
     }
@@ -232,13 +238,16 @@ private fun ShoppingListCard(
     shoppingList: ShoppingList,
     onRename: () -> Unit,
     onDelete: () -> Unit,
-) {
+    onItemClick: () -> Unit,
+
+    ) {
     val icon = ShoppingListIconRegistry.resolve(shoppingList.iconKey)
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        onClick = { onItemClick() }
     ) {
         Row(
             modifier = Modifier
