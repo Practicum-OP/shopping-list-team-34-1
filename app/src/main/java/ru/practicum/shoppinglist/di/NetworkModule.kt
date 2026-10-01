@@ -12,6 +12,12 @@ import ru.practicum.shoppinglist.data.local.storage.AuthTokenStorage
 import ru.practicum.shoppinglist.data.local.storage.DataStoreAuthTokenStorage
 import ru.practicum.shoppinglist.data.repository.AuthRepositoryImpl
 import ru.practicum.shoppinglist.domain.api.repository.AuthRepository
+import org.koin.core.module.dsl.viewModelOf
+import ru.practicum.shoppinglist.presentation.auth.check.AuthCheckViewModel
+import ru.practicum.shoppinglist.presentation.auth.login.LoginViewModel
+import ru.practicum.shoppinglist.presentation.auth.recovery.PasswordRecoveryViewModel
+import ru.practicum.shoppinglist.presentation.auth.registration.RegistrationViewModel
+
 private const val BASE_URL =
     "https://faiwlkhyssrgofauzegs.supabase.co/functions/v1/"
 
@@ -57,4 +63,10 @@ internal val networkModule = module {
             tokenStorage = get(),
         )
     }
+
+    viewModelOf(::LoginViewModel)
+    viewModelOf(::RegistrationViewModel)
+    viewModelOf(::PasswordRecoveryViewModel)
+    viewModelOf(::AuthCheckViewModel)
+
 }

@@ -43,4 +43,36 @@
     <string name="sort_manual">Ручная сортировка</string>
     <string name="sort_alphabetical">По алфавиту</string>
 
+    <string name="login_title">Список покупок</string>
+    <string name="login_subtitle">Войдите, чтобы продолжить</string>
+
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Пароль</string>
+    <string name="auth_email_error">Введите корректный email</string>
+    <string name="auth_password_error">Пароль должен содержать не менее 7 символов</string>
+    <string name="auth_show_password">Показать пароль</string>
+    <string name="auth_hide_password">Скрыть пароль</string>
+
+    <string name="login_action">Войти</string>
+    <string name="registration_action">Зарегистрироваться</string>
+    <string name="password_recovery_action">Восстановить пароль</string>
+
+    <string name="auth_error_invalid_data">Проверьте введённые данные</string>
+    <string name="auth_error_user_already_exists">Пользователь с таким email уже существует</string>
+    <string name="auth_error_invalid_credentials">Неверный email или пароль</string>
+    <string name="auth_error_network">Нет подключения к интернету</string>
+    <string name="auth_error_server">Ошибка сервера. Попробуйте позже</string>
+    <string name="auth_error_unknown">Не удалось выполнить операцию</string>
+
+    <string name="registration_title">Регистрация</string>
+    <string name="registration_subtitle">Создайте аккаунт, чтобы сохранять списки покупок</string>
+    <string name="auth_repeat_password_label">Повторите пароль</string>
+    <string name="auth_passwords_mismatch">Пароли не совпадают</string>
+    <string name="auth_navigate_back">Назад</string>
+
+    <string name="password_recovery_title">Восстановление пароля</string>
+    <string name="password_recovery_subtitle">Укажите email, использованный при регистрации</string>
+    <string name="password_recovery_submit">Отправить письмо для восстановления пароля</string>
+    <string name="password_recovery_success">Запрос на восстановление пароля отправлен</string>
+
 </resources>
