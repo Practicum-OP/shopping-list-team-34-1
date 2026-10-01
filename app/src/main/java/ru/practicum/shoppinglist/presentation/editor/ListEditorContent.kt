@@ -31,19 +31,6 @@ import ru.practicum.shoppinglist.domain.api.model.ShoppingItem
 import ru.practicum.shoppinglist.domain.api.model.ShoppingItemSort
 
 
-private val BackgroundColor = Color(0xFFFFF8F4)
-private val OnSurfaceColor = Color(0xFF211A14)
-private val OnSurfaceVariantColor = Color(0xFF50453A)
-private val PrimaryContainerColor = Color(0xFFFFDCBB)
-private val OnPrimaryContainerColor = Color(0xFF2B1700)
-private val DividerColor = Color(0xFFCAC4D0)
-private val SurfaceDimColor = Color(0xFFE5D8CC)
-private val PrimaryColor = Color(0xFF845416)
-private val SecondaryContainerColor = Color(0xFFFEDDBD)
-private val OnSecondaryContainerColor = Color(0xFF281805)
-private val SortMenuBackgroundColor = Color(0xFFFAEBE0)
-private val SortMenuItemSelectedColor = Color(0xFFFEDDBD)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ListEditorContent(
@@ -53,7 +40,7 @@ internal fun ListEditorContent(
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
-        containerColor = BackgroundColor,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             ListsTopBar(
                 listName = state.listName.ifEmpty { stringResource(R.string.editor_title) },
@@ -119,7 +106,7 @@ private fun ListsTopBar(
         title = {
             Text(
                 text = listName,
-                color = OnSurfaceColor,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Normal,
             )
@@ -129,7 +116,7 @@ private fun ListsTopBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.navigate_back),
-                    tint = OnSurfaceColor,
+                    tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
         },
@@ -138,12 +125,12 @@ private fun ListsTopBar(
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
                     contentDescription = stringResource(R.string.menu),
-                    tint = OnSurfaceVariantColor,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = BackgroundColor,
+            containerColor = MaterialTheme.colorScheme.background,
         ),
     )
 }
@@ -152,8 +139,8 @@ private fun ListsTopBar(
 private fun CreateItemButton(onClick: () -> Unit) {
     FloatingActionButton(
         onClick = onClick,
-        containerColor = PrimaryContainerColor,
-        contentColor = OnPrimaryContainerColor,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         shape = RoundedCornerShape(16.dp),
     ) {
         Icon(
@@ -173,7 +160,7 @@ private fun ListsBody(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundColor)
+            .background(MaterialTheme.colorScheme.background)
             .padding(contentPadding),
     ) {
         if (state.items.isEmpty()) {
@@ -197,13 +184,13 @@ private fun EmptyState() {
             Surface(
                 modifier = Modifier.size(324.dp, 300.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFD4C4B5),
+                color = MaterialTheme.colorScheme.surfaceVariant,
             ) {
                 Icon(
                     modifier = Modifier.size(120.dp),
                     imageVector = Icons.Outlined.ShoppingCart,
                     contentDescription = null,
-                    tint = OnSurfaceVariantColor,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Column(
@@ -212,14 +199,14 @@ private fun EmptyState() {
             ) {
                 Text(
                     text = stringResource(R.string.editor_empty_title),
-                    color = OnSurfaceColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 0.15.sp,
                 )
                 Text(
                     text = stringResource(R.string.editor_empty_subtitle),
-                    color = OnSurfaceColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
                     lineHeight = 20.sp,
@@ -281,39 +268,58 @@ private fun SwipeableListItem(
 }
 
 @Composable
-private fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
+private fun SwipeBackground(
+    dismissState: SwipeToDismissBoxState,
+) {
     val direction = dismissState.dismissDirection
-    val icon: ImageVector?
-    val alignment: Alignment
 
-    when (direction) {
-        SwipeToDismissBoxValue.StartToEnd -> {
-            icon = Icons.Filled.Edit
-            alignment = Alignment.CenterStart
-        }
-        SwipeToDismissBoxValue.EndToStart -> {
-            icon = Icons.Filled.Delete
-            alignment = Alignment.CenterEnd
-        }
-        else -> {
-            icon = null
-            alignment = Alignment.Center
-        }
+    val icon = when (direction) {
+        SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.Edit
+        SwipeToDismissBoxValue.EndToStart -> Icons.Filled.Delete
+        SwipeToDismissBoxValue.Settled -> null
+    }
+
+    val alignment = when (direction) {
+        SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+        SwipeToDismissBoxValue.Settled -> Alignment.Center
+    }
+
+    val backgroundColor = when (direction) {
+        SwipeToDismissBoxValue.StartToEnd ->
+            MaterialTheme.colorScheme.primaryContainer
+
+        SwipeToDismissBoxValue.EndToStart ->
+            MaterialTheme.colorScheme.errorContainer
+
+        SwipeToDismissBoxValue.Settled ->
+            MaterialTheme.colorScheme.background
+    }
+
+    val iconColor = when (direction) {
+        SwipeToDismissBoxValue.StartToEnd ->
+            MaterialTheme.colorScheme.onPrimaryContainer
+
+        SwipeToDismissBoxValue.EndToStart ->
+            MaterialTheme.colorScheme.onErrorContainer
+
+        SwipeToDismissBoxValue.Settled ->
+            MaterialTheme.colorScheme.onBackground
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundColor)
+            .background(backgroundColor)
             .padding(horizontal = 20.dp),
         contentAlignment = alignment,
     ) {
-        if (icon != null) {
+        icon?.let {
             Icon(
-                imageVector = icon,
+                imageVector = it,
                 contentDescription = null,
-                tint = OnSecondaryContainerColor,
-                modifier = Modifier.size(24.dp)
+                tint = iconColor,
+                modifier = Modifier.size(24.dp),
             )
         }
     }
@@ -325,10 +331,27 @@ private fun ShoppingListItem(
     onIntent: (ListEditorIntent) -> Unit,
 ) {
     val isPurchased = item.isPurchased
-    val textColor = if (isPurchased) SurfaceDimColor else OnSurfaceColor
-    val quantityColor = if (isPurchased) SurfaceDimColor else OnSurfaceVariantColor
+    val purchasedColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+        alpha = 0.6f,
+    )
 
-    Column {
+    val textColor = if (isPurchased) {
+        purchasedColor
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    val quantityColor = if (isPurchased) {
+        purchasedColor
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Column(
+        modifier = Modifier.background(
+            MaterialTheme.colorScheme.background,
+        ),
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -341,7 +364,7 @@ private fun ShoppingListItem(
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = stringResource(R.string.item_purchased),
-                    tint = PrimaryColor,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .size(24.dp)
                         .clickable { onIntent(ListEditorIntent.ItemToggled(item.id)) }
@@ -350,7 +373,7 @@ private fun ShoppingListItem(
                 Icon(
                     imageVector = Icons.Filled.Circle,
                     contentDescription = stringResource(R.string.item_not_purchased),
-                    tint = OnSurfaceVariantColor,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .size(24.dp)
                         .clickable { onIntent(ListEditorIntent.ItemToggled(item.id)) }
@@ -378,7 +401,7 @@ private fun ShoppingListItem(
         }
 
         HorizontalDivider(
-            color = DividerColor,
+            color = MaterialTheme.colorScheme.outlineVariant,
         )
     }
 }
@@ -394,7 +417,7 @@ private fun SortMenuBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = SortMenuBackgroundColor,
+        containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -406,7 +429,9 @@ private fun SortMenuBottomSheet(
                     onDismiss()
                 }
             )
-            HorizontalDivider(color = Color(0xFFD4C4B5))
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
             SortMenuItem(
                 text = stringResource(R.string.sort_alphabetical),
                 isSelected = currentSortType == ShoppingItemSort.ALPHABETICAL,
@@ -429,7 +454,7 @@ private fun SortMenuItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isSelected) SortMenuItemSelectedColor else Color.Transparent)
+            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -437,14 +462,14 @@ private fun SortMenuItem(
     ) {
         Text(
             text = text,
-            color = OnSurfaceColor,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 16.sp,
         )
         if (isSelected) {
             Icon(
                 imageVector = Icons.Filled.CheckCircle,
                 contentDescription = null,
-                tint = PrimaryColor,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
         }

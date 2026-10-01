@@ -21,18 +21,6 @@ private const val CREATE_NAME_TEST_TAG = "create_item_name"
 private const val DELETE_DIALOG_TEST_TAG = "delete_item_dialog"
 private const val CLEAR_DIALOG_TEST_TAG = "clear_list_dialog"
 
-val DialogBackgroundColor = Color(0xFFF4E6DA)
-val DialogPrimaryButtonColor = Color(0xFF845416)
-val DialogOnPrimaryButtonColor = Color(0xFFFFFFFF)
-val DialogSecondaryButtonColor = Color(0xFFFEDDBD)
-val DialogOnSecondaryButtonColor = Color(0xFF281805)
-val BottomSheetBackgroundColor = Color(0xFFFFF1E7)
-
-private val OnSurfaceColor = Color(0xFF211A14)
-private val OnSurfaceVariantColor = Color(0xFF50453A)
-private val PrimaryContainerColor = Color(0xFFFFDCBB)
-private val OnPrimaryContainerColor = Color(0xFF2B1700)
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +37,8 @@ internal fun CreateItemBottomSheet(
         modifier = Modifier.testTag(CREATE_SHEET_TEST_TAG),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = BottomSheetBackgroundColor,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         shape = MaterialTheme.shapes.large,
     ) {
         Column(
@@ -59,9 +48,14 @@ internal fun CreateItemBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = stringResource(if (!isEditing)R.string.editor_create_dialog_title else R.string.editor_edit_dialog_title),
+                text = stringResource(
+                    if (isEditing) {
+                        R.string.editor_edit_dialog_title
+                    } else {
+                        R.string.editor_create_dialog_title
+                    },
+                ),
                 style = MaterialTheme.typography.titleMedium,
-                color = OnSurfaceColor,
                 modifier = Modifier.padding(bottom = 8.dp),
             )
             ItemForm(
@@ -85,8 +79,8 @@ internal fun CreateItemBottomSheet(
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryContainerColor,
-                    contentColor = OnPrimaryContainerColor,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 shape = MaterialTheme.shapes.medium,
             ) {
@@ -94,7 +88,7 @@ internal fun CreateItemBottomSheet(
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
                         strokeWidth = 2.dp,
-                        color = OnPrimaryContainerColor,
+                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                 } else {
                     Text(
@@ -194,18 +188,18 @@ internal fun DeleteItemDialog(
     AlertDialog(
         modifier = Modifier.testTag(DELETE_DIALOG_TEST_TAG),
         onDismissRequest = { onIntent(ListEditorIntent.DeleteCancelled) },
-        containerColor = DialogBackgroundColor,
+        containerColor = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.extraLarge,
         title = {
             Text(
                 text = stringResource(R.string.editor_delete_dialog_title),
-                color = OnSurfaceColor
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         text = {
             Text(
                 text = stringResource(R.string.editor_delete_dialog_body, shoppingItem.name),
-                color = OnSurfaceVariantColor
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         confirmButton = {
@@ -213,7 +207,6 @@ internal fun DeleteItemDialog(
                 label = stringResource(R.string.action_delete),
                 isSubmitting = isSubmitting,
                 isActionEnabled = true,
-                isPrimary = true,
                 onClick = { onIntent(ListEditorIntent.ItemDeleted(shoppingItem.id)) },
             )
         },
@@ -221,7 +214,9 @@ internal fun DeleteItemDialog(
             TextButton(
                 enabled = !isSubmitting,
                 onClick = { onIntent(ListEditorIntent.DeleteCancelled) },
-                colors = ButtonDefaults.textButtonColors(contentColor = DialogOnSecondaryButtonColor)
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                )
             ) {
                 Text(stringResource(R.string.action_cancel))
             }
@@ -236,19 +231,21 @@ internal fun ClearListDialog(
 ) {
     AlertDialog(
         modifier = Modifier.testTag(CLEAR_DIALOG_TEST_TAG),
-        onDismissRequest = { onIntent(ListEditorIntent.ClearCancelled) },
-        containerColor = DialogBackgroundColor,
+        onDismissRequest = {
+            onIntent(ListEditorIntent.ClearCancelled)
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.extraLarge,
         title = {
             Text(
                 text = stringResource(R.string.editor_clear_dialog_title),
-                color = OnSurfaceColor
+                color = MaterialTheme.colorScheme.onSurface,
             )
         },
         text = {
             Text(
                 text = stringResource(R.string.editor_clear_dialog_body),
-                color = OnSurfaceVariantColor
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
         confirmButton = {
@@ -256,15 +253,20 @@ internal fun ClearListDialog(
                 label = stringResource(R.string.action_yes),
                 isSubmitting = isSubmitting,
                 isActionEnabled = true,
-                isPrimary = true,
-                onClick = { onIntent(ListEditorIntent.ClearConfirmed) },
+                onClick = {
+                    onIntent(ListEditorIntent.ClearConfirmed)
+                },
             )
         },
         dismissButton = {
             TextButton(
                 enabled = !isSubmitting,
-                onClick = { onIntent(ListEditorIntent.ClearCancelled) },
-                colors = ButtonDefaults.textButtonColors(contentColor = DialogOnSecondaryButtonColor)
+                onClick = {
+                    onIntent(ListEditorIntent.ClearCancelled)
+                },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
             ) {
                 Text(stringResource(R.string.action_cancel))
             }
@@ -277,15 +279,14 @@ private fun DialogConfirmButton(
     label: String,
     isSubmitting: Boolean,
     isActionEnabled: Boolean,
-    isPrimary: Boolean,
     onClick: () -> Unit,
 ) {
     Button(
         enabled = !isSubmitting && isActionEnabled,
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isPrimary) DialogPrimaryButtonColor else DialogSecondaryButtonColor,
-            contentColor = if (isPrimary) DialogOnPrimaryButtonColor else DialogOnSecondaryButtonColor,
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
         ),
         shape = MaterialTheme.shapes.extraLarge,
     ) {
@@ -293,7 +294,7 @@ private fun DialogConfirmButton(
             CircularProgressIndicator(
                 modifier = Modifier.size(18.dp),
                 strokeWidth = 2.dp,
-                color = if (isPrimary) DialogOnPrimaryButtonColor else DialogOnSecondaryButtonColor,
+                color = MaterialTheme.colorScheme.onError,
             )
         } else {
             Text(label)
