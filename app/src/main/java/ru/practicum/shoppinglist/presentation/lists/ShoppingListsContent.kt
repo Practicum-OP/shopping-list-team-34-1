@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.practicum.shoppinglist.R
 import ru.practicum.shoppinglist.domain.api.model.ShoppingList
+import androidx.compose.material.icons.automirrored.outlined.Logout
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +59,14 @@ internal fun ShoppingListsContent(
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { ListsTopBar() },
+        topBar = {
+            ListsTopBar(
+                enabled = !state.isLoggingOut && !state.isSubmitting,
+                onLogout = {
+                    onAction(ShoppingListsAction.LogoutClicked)
+                },
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             CreateListButton { onAction(ShoppingListsAction.CreateListClicked) }
@@ -99,7 +107,10 @@ internal fun ShoppingListsContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ListsTopBar() {
+private fun ListsTopBar(
+    enabled: Boolean,
+    onLogout: () -> Unit,
+) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -107,6 +118,19 @@ private fun ListsTopBar() {
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
             )
+        },
+        actions = {
+            IconButton(
+                enabled = enabled,
+                onClick = onLogout,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.Logout,
+                    contentDescription = stringResource(
+                        R.string.auth_logout,
+                    ),
+                )
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,

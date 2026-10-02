@@ -1,46 +1,46 @@
-package ru.practicum.shoppinglist.presentation.lists
+package ru.practicum.shoppinglist.presentation.auth.registration
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
-import ru.practicum.shoppinglist.R
+import ru.practicum.shoppinglist.presentation.auth.messageResource
 
 @Composable
-internal fun ShoppingListsScreen(
-    viewModel: ShoppingListsViewModel = koinViewModel(),
-    onListClick: (Long, String) -> Unit = { _, _ -> },
-    onLogout: () -> Unit = {},
+internal fun RegistrationScreen(
+    onNavigateBack: () -> Unit,
+    onRegistrationSuccess: () -> Unit,
+    viewModel: RegistrationViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    val operationFailedMessage =
-        stringResource(R.string.lists_operation_failed)
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                ShoppingListsEffect.OperationFailed -> {
-                    snackbarHostState.showSnackbar(
-                        operationFailedMessage,
-                    )
+                RegistrationEffect.NavigateBack -> onNavigateBack()
+
+                RegistrationEffect.NavigateToShoppingLists -> {
+                    onRegistrationSuccess()
                 }
 
-                ShoppingListsEffect.NavigateToList -> Unit
-                ShoppingListsEffect.NavigateToLogin -> onLogout()
+                is RegistrationEffect.ShowError -> {
+                    snackbarHostState.showSnackbar(
+                        context.getString(effect.error.messageResource),
+                    )
+                }
             }
         }
     }
 
-    ShoppingListsContent(
+    RegistrationContent(
         state = state,
         snackbarHostState = snackbarHostState,
-        onAction = viewModel::onAction,
-        onItemClick = onListClick,
+        onIntent = viewModel::onIntent,
     )
 }

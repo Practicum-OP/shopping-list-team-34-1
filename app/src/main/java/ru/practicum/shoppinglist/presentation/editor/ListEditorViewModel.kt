@@ -130,7 +130,7 @@ internal class ListEditorViewModel(
         if (query.isBlank()) return
 
         suggestionsJob = viewModelScope.launch {
-            delay(300)
+            delay(SUGGESTIONS_DEBOUNCE_MILLIS)
             runCatching {
                 interactor.findProductSuggestions(query, limit = 5)
             }.onSuccess { suggestions ->
@@ -359,3 +359,5 @@ private inline fun MutableStateFlow<ListEditorUiState>.updateUnlessSubmitting(
 ) {
     update { state -> if (state.isSubmitting) state else transform(state) }
 }
+
+private const val SUGGESTIONS_DEBOUNCE_MILLIS = 300L
