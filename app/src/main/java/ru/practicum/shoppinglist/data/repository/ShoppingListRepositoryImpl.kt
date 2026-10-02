@@ -72,12 +72,11 @@ internal class ShoppingListRepositoryImpl(
                 sourceItem.copy(
                     id = 0,
                     shoppingListId = newListId,
-                    isPurchased = false,
                 )
             }
 
-            if (copiedItems.isNotEmpty()) {
-                shoppingItemDao.insertAll(copiedItems)
+            copiedItems.forEach { copiedItem ->
+                shoppingItemDao.insert(copiedItem)
             }
 
             newListId

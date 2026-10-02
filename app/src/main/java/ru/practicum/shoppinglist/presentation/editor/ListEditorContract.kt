@@ -33,6 +33,7 @@ internal sealed interface ListEditorIntent {
     data class UnitChanged(val unit: MeasurementUnit) : ListEditorIntent
     data object ConfirmAddItem : ListEditorIntent
     data class SuggestionSelected(val name: String) : ListEditorIntent
+    data object SuggestionsDismissed : ListEditorIntent
 
     data class ItemEdited(val item: ShoppingItem) : ListEditorIntent
     data class ItemDeleted(val itemId: Long) : ListEditorIntent
@@ -48,7 +49,10 @@ internal sealed interface ListEditorIntent {
 
     data class SortChanged(val sortType: ShoppingItemSort) : ListEditorIntent
     data object ToggleSortMenu : ListEditorIntent
-    data class ItemMoved(val fromIndex: Int, val toIndex: Int) : ListEditorIntent
+    data class ItemMoved(
+        val itemId: Long,
+        val direction: Int,
+    ) : ListEditorIntent
 }
 
 internal sealed interface ListEditorEffect {

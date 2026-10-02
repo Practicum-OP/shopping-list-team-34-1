@@ -20,9 +20,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuBoxScope
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -46,6 +46,7 @@ import kotlin.enums.enumEntries
 
 private const val CREATE_SHEET_TEST_TAG = "create_item_sheet"
 private const val CREATE_NAME_TEST_TAG = "create_item_name"
+private const val SUGGESTIONS_TEST_TAG = "product_name_suggestions"
 private const val DELETE_DIALOG_TEST_TAG = "delete_item_dialog"
 private const val CLEAR_DIALOG_TEST_TAG = "clear_list_dialog"
 
@@ -182,15 +183,9 @@ private fun ItemForm(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         ItemNameField(
-            name = state.name,
-            showError = state.showNameError,
+            state = state,
             isSubmitting = isSubmitting,
-            onNameChanged = {
-                onIntent(ListEditorIntent.NameChanged(it))
-            },
-            onDone = {
-                onIntent(ListEditorIntent.ConfirmAddItem)
-            },
+            onIntent = onIntent,
         )
 
         ItemQuantityField(
@@ -212,40 +207,89 @@ private fun ItemForm(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ItemNameField(
-    name: String,
-    showError: Boolean,
+    state: CreateItemDialogState,
     isSubmitting: Boolean,
-    onNameChanged: (String) -> Unit,
-    onDone: () -> Unit,
+    onIntent: (ListEditorIntent) -> Unit,
+) {
+    val suggestionsVisible = state.suggestions.isNotEmpty() && !isSubmitting
+    ExposedDropdownMenuBox(
+        expanded = suggestionsVisible,
+        onExpandedChange = { expanded ->
+            if (!expanded) {
+                onIntent(ListEditorIntent.SuggestionsDismissed)
+            }
+        },
+    ) {
+        ProductNameTextField(
+            state = state,
+            isSubmitting = isSubmitting,
+            onIntent = onIntent,
+        )
+        ProductSuggestionsMenu(state.suggestions, suggestionsVisible, onIntent)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExposedDropdownMenuBoxScope.ProductNameTextField(
+    state: CreateItemDialogState,
+    isSubmitting: Boolean,
+    onIntent: (ListEditorIntent) -> Unit,
 ) {
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
+            .menuAnchor(
+                type = ExposedDropdownMenuAnchorType.PrimaryEditable,
+                enabled = !isSubmitting,
+            )
             .testTag(CREATE_NAME_TEST_TAG),
-        value = name,
+        value = state.name,
         enabled = !isSubmitting,
-        onValueChange = onNameChanged,
-        label = {
-            Text(stringResource(R.string.editor_name_label))
+        onValueChange = { name ->
+            onIntent(ListEditorIntent.NameChanged(name))
         },
-        isError = showError,
-        supportingText = if (showError) {
-            {
-                Text(stringResource(R.string.editor_name_required))
-            }
+        label = { Text(stringResource(R.string.editor_name_label)) },
+        isError = state.showNameError,
+        supportingText = if (state.showNameError) {
+            { Text(stringResource(R.string.editor_name_required)) }
         } else {
             null
         },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done,
-        ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(
-            onDone = { onDone() },
+            onDone = { onIntent(ListEditorIntent.ConfirmAddItem) },
         ),
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExposedDropdownMenuBoxScope.ProductSuggestionsMenu(
+    suggestions: List<String>,
+    expanded: Boolean,
+    onIntent: (ListEditorIntent) -> Unit,
+) {
+    ExposedDropdownMenu(
+        modifier = Modifier.testTag(SUGGESTIONS_TEST_TAG),
+        expanded = expanded,
+        onDismissRequest = {
+            onIntent(ListEditorIntent.SuggestionsDismissed)
+        },
+    ) {
+        suggestions.forEach { suggestion ->
+            DropdownMenuItem(
+                text = { Text(text = suggestion, maxLines = 1) },
+                onClick = {
+                    onIntent(ListEditorIntent.SuggestionSelected(suggestion))
+                },
+            )
+        }
+    }
 }
 
 @Composable

@@ -37,6 +37,7 @@ internal sealed interface ShoppingListsAction {
     data class RenameNameChanged(val name: String) : ShoppingListsAction
     data class RenameIconSelected(val iconKey: String) : ShoppingListsAction
     data object RenameConfirmed : ShoppingListsAction
+    data class DuplicateListClicked(val listId: Long) : ShoppingListsAction
     data class DeleteListClicked(val shoppingList: ShoppingList) : ShoppingListsAction
     data object DeleteDialogDismissed : ShoppingListsAction
     data object DeleteConfirmed : ShoppingListsAction

@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -165,7 +165,11 @@ private fun ListsBody(
         if (state.items.isEmpty()) {
             EmptyState()
         } else {
-            ItemsList(items = state.items, onIntent = onIntent)
+            ItemsList(
+                items = state.items,
+                isManualSort = state.sortType == ShoppingItemSort.MANUAL,
+                onIntent = onIntent,
+            )
         }
     }
 }
@@ -220,14 +224,24 @@ private fun EmptyState() {
 @Composable
 private fun ItemsList(
     items: List<ShoppingItem>,
+    isManualSort: Boolean,
     onIntent: (ListEditorIntent) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 8.dp),
     ) {
-        items(items = items, key = ShoppingItem::id) { item ->
-            SwipeableListItem(item = item, onIntent = onIntent)
+        itemsIndexed(
+            items = items,
+            key = { _, item -> item.id },
+        ) { index, item ->
+            SwipeableListItem(
+                item = item,
+                itemIndex = index,
+                itemCount = items.size,
+                isManualSort = isManualSort,
+                onIntent = onIntent,
+            )
         }
     }
 }
@@ -236,6 +250,9 @@ private fun ItemsList(
 @Composable
 private fun SwipeableListItem(
     item: ShoppingItem,
+    itemIndex: Int,
+    itemCount: Int,
+    isManualSort: Boolean,
     onIntent: (ListEditorIntent) -> Unit,
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
@@ -260,7 +277,15 @@ private fun SwipeableListItem(
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = { SwipeBackground(dismissState) },
-        content = { ShoppingListItem(item = item, onIntent = onIntent) },
+        content = {
+            ShoppingListItem(
+                item = item,
+                itemIndex = itemIndex,
+                itemCount = itemCount,
+                isDragEnabled = isManualSort,
+                onIntent = onIntent,
+            )
+        },
         enableDismissFromStartToEnd = true,
         enableDismissFromEndToStart = true,
     )
@@ -437,5 +462,3 @@ private fun EditorOverlays(
         )
     }
 }
-
-private const val PURCHASED_CONTENT_ALPHA = 0.6f

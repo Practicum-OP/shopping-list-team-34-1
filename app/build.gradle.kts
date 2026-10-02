@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.koin.androidx.compose)
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation(platform(libs.kotlinx.serialization.bom))
 
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.gson)

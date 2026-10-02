@@ -13,8 +13,8 @@ internal interface ProductNameDao {
 
     @Query(
         "SELECT display_name FROM product_names " +
-                "WHERE normalized_name LIKE :normalizedQuery || '%' " +
-                "ORDER BY last_used_at DESC LIMIT :limit",
+                "WHERE substr(normalized_name, 1, length(:normalizedQuery)) = :normalizedQuery " +
+                "ORDER BY last_used_at DESC, normalized_name ASC LIMIT :limit",
     )
     suspend fun findSuggestions(
         normalizedQuery: String,
