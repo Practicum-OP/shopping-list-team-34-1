@@ -12,9 +12,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.practicum.shoppinglist.domain.api.interactor.ShoppingListInteractor
 import ru.practicum.shoppinglist.domain.api.model.ShoppingList
+import ru.practicum.shoppinglist.domain.api.repository.AuthRepository
 
 internal class ShoppingListsViewModel(
     private val interactor: ShoppingListInteractor,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     private val mutableState = MutableStateFlow(ShoppingListsUiState())
@@ -52,6 +54,7 @@ internal class ShoppingListsViewModel(
             is ShoppingListsAction.DeleteListClicked -> requestDeletion(action.shoppingList)
             ShoppingListsAction.DeleteDialogDismissed -> dismissDeleteDialog()
             ShoppingListsAction.DeleteConfirmed -> deleteList()
+            ShoppingListsAction.LogoutClicked -> logout()
         }
     }
 
@@ -183,6 +186,38 @@ internal class ShoppingListsViewModel(
     private fun onOperationFailed() {
         mutableState.update { state -> state.copy(isSubmitting = false) }
         effectChannel.trySend(ShoppingListsEffect.OperationFailed)
+    }
+
+    private fun logout() {
+        val currentState = mutableState.value
+
+        if (currentState.isLoggingOut) {
+            return
+        }
+
+        mutableState.update { state ->
+            state.copy(isLoggingOut = true)
+        }
+
+        viewModelScope.launch {
+            val result = runCatching {
+                authRepository.logout()
+            }
+
+            mutableState.update { state ->
+                state.copy(isLoggingOut = false)
+            }
+
+            if (result.isSuccess) {
+                effectChannel.send(
+                    ShoppingListsEffect.NavigateToLogin,
+                )
+            } else {
+                effectChannel.send(
+                    ShoppingListsEffect.OperationFailed,
+                )
+            }
+        }
     }
 
 }

@@ -126,6 +126,14 @@ private fun NavGraphBuilder.shoppingListsDestination(
                     ),
                 )
             },
+            onLogout = {
+                navController.navigate(AppRoute.LOGIN) {
+                    popUpTo(AppRoute.SHOPPING_LISTS) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            },
         )
     }
 }

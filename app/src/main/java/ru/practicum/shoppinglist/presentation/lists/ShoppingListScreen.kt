@@ -14,19 +14,25 @@ import ru.practicum.shoppinglist.R
 internal fun ShoppingListsScreen(
     viewModel: ShoppingListsViewModel = koinViewModel(),
     onListClick: (Long, String) -> Unit = { _, _ -> },
-
-    ) {
+    onLogout: () -> Unit = {},
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val operationFailedMessage = stringResource(R.string.lists_operation_failed)
+
+    val operationFailedMessage =
+        stringResource(R.string.lists_operation_failed)
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 ShoppingListsEffect.OperationFailed -> {
-                    snackbarHostState.showSnackbar(operationFailedMessage)
+                    snackbarHostState.showSnackbar(
+                        operationFailedMessage,
+                    )
                 }
-                ShoppingListsEffect.NavigateToList -> onListClick
+
+                ShoppingListsEffect.NavigateToList -> Unit
+                ShoppingListsEffect.NavigateToLogin -> onLogout()
             }
         }
     }
@@ -35,6 +41,6 @@ internal fun ShoppingListsScreen(
         state = state,
         snackbarHostState = snackbarHostState,
         onAction = viewModel::onAction,
-        onItemClick = onListClick
+        onItemClick = onListClick,
     )
 }
