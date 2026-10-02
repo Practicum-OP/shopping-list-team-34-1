@@ -51,6 +51,7 @@ internal class ShoppingListsViewModel(
                 mutableState.selectRenameIcon(action.iconKey)
             }
             ShoppingListsAction.RenameConfirmed -> renameList()
+            is ShoppingListsAction.DuplicateListClicked -> duplicateList(action.listId)
             is ShoppingListsAction.DeleteListClicked -> requestDeletion(action.shoppingList)
             ShoppingListsAction.DeleteDialogDismissed -> dismissDeleteDialog()
             ShoppingListsAction.DeleteConfirmed -> deleteList()
@@ -161,6 +162,23 @@ internal class ShoppingListsViewModel(
 
     private fun requestDeletion(shoppingList: ShoppingList) {
         mutableState.update { state -> state.copy(listPendingDeletion = shoppingList) }
+    }
+
+    private fun duplicateList(listId: Long) {
+        if (mutableState.value.isSubmitting || listId <= 0) return
+
+        mutableState.update { state -> state.copy(isSubmitting = true) }
+        viewModelScope.launch {
+            runCatching { interactor.duplicateShoppingList(listId) }
+                .onSuccess { duplicatedListId ->
+                    if (duplicatedListId != null) {
+                        mutableState.update { state -> state.copy(isSubmitting = false) }
+                    } else {
+                        onOperationFailed()
+                    }
+                }
+                .onFailure { onOperationFailed() }
+        }
     }
 
     private fun dismissDeleteDialog() {

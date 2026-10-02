@@ -104,12 +104,23 @@ internal class ShoppingItemInteractorImpl(
     override suspend fun updatePositions(
         shoppingItems: List<ShoppingItem>,
     ) {
+        if (!shoppingItems.haveValidOrderIdentity()) return
+
         val itemsWithUpdatedPositions =
             shoppingItems.mapIndexed { index, shoppingItem ->
                 shoppingItem.copy(position = index)
             }
 
         repository.updatePositions(itemsWithUpdatedPositions)
+    }
+
+    private fun List<ShoppingItem>.haveValidOrderIdentity(): Boolean {
+        if (isEmpty()) return false
+
+        val listId = first().shoppingListId
+        return listId > 0 &&
+                all { item -> item.id > 0 && item.shoppingListId == listId } &&
+                map(ShoppingItem::id).distinct().size == size
     }
 
     override suspend fun findProductSuggestions(

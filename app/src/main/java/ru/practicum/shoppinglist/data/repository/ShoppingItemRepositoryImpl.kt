@@ -98,11 +98,12 @@ internal class ShoppingItemRepositoryImpl(
     override suspend fun updatePositions(
         shoppingItems: List<ShoppingItem>,
     ) {
-        val entities = shoppingItems.map { shoppingItem ->
-            shoppingItem.toEntity()
-        }
+        if (shoppingItems.isEmpty()) return
 
-        shoppingItemDao.updateAll(entities)
+        shoppingItemDao.replacePositions(
+            listId = shoppingItems.first().shoppingListId,
+            orderedItemIds = shoppingItems.map(ShoppingItem::id),
+        )
     }
 
     override suspend fun findProductSuggestions(
