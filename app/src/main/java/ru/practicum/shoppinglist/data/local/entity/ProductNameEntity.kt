@@ -2,11 +2,13 @@ package ru.practicum.shoppinglist.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-// Таблица подсказок
-
-@Entity(tableName = "product_names")
+@Entity(
+    tableName = "product_names",
+    indices = [Index(value = ["last_used_at"])],
+)
 data class ProductNameEntity(
     @PrimaryKey
     @ColumnInfo(name = "normalized_name")

@@ -3,8 +3,8 @@ package ru.practicum.shoppinglist.presentation.editor
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -32,7 +32,15 @@ internal class ListEditorViewModel(
     private val effectChannel = Channel<ListEditorEffect>(Channel.BUFFERED)
     val effects = effectChannel.receiveAsFlow()
 
-    private var suggestionsJob: kotlinx.coroutines.Job? = null
+    private var itemsJob: Job? = null
+    private val improvementController = ListEditorImprovementController(
+        state = mutableState,
+        scope = viewModelScope,
+        interactor = interactor,
+        onFailure = {
+            effectChannel.trySend(ListEditorEffect.OperationFailed)
+        },
+    )
 
     init {
         observeShoppingItems(ShoppingItemSort.MANUAL)
@@ -46,6 +54,7 @@ internal class ListEditorViewModel(
             is ListEditorIntent.UnitChanged -> handleUnitChanged(intent.unit)
             is ListEditorIntent.ConfirmAddItem -> handleConfirmAddItem()
             is ListEditorIntent.SuggestionSelected -> handleSuggestionSelected(intent.name)
+            is ListEditorIntent.SuggestionsDismissed -> dismissSuggestions()
             is ListEditorIntent.ItemEdited -> editItem(intent.item)
             is ListEditorIntent.ItemDeleted -> deleteItem(intent.itemId)
             is ListEditorIntent.ItemEditRequested -> handleItemEditRequested(intent.itemId)
@@ -57,7 +66,10 @@ internal class ListEditorViewModel(
             is ListEditorIntent.ClearCancelled -> dismissClearDialog()
             is ListEditorIntent.SortChanged -> handleSortChanged(intent.sortType)
             is ListEditorIntent.ToggleSortMenu -> toggleSortMenu()
-            is ListEditorIntent.ItemMoved -> handleItemMoved(intent.fromIndex, intent.toIndex)
+            is ListEditorIntent.ItemMoved -> improvementController.moveItem(
+                itemId = intent.itemId,
+                direction = intent.direction,
+            )
         }
     }
 
@@ -84,19 +96,34 @@ internal class ListEditorViewModel(
     }
 
     private fun observeShoppingItems(sort: ShoppingItemSort) {
-        viewModelScope.launch {
+        itemsJob?.cancel()
+        itemsJob = viewModelScope.launch {
             interactor.observeShoppingItems(listId = listId, sort = sort)
                 .catch {
                     mutableState.update { it.copy(isSubmitting = false) }
                     effectChannel.trySend(ListEditorEffect.OperationFailed)
                 }
                 .collect { items ->
-                    mutableState.update { it.copy(items = items, isSubmitting = false) }
+                    val visibleItems = if (sort == ShoppingItemSort.MANUAL) {
+                        improvementController.acceptManualItems(items)
+                    } else {
+                        items
+                    }
+                    mutableState.update { state ->
+                        if (state.sortType != sort) {
+                            state
+                        } else {
+                            state.copy(items = visibleItems, isSubmitting = false)
+                        }
+                    }
                 }
         }
     }
 
     private fun handleAddItemClicked() {
+        if (mutableState.value.createDialog != null) {
+            improvementController.cancelSuggestions()
+        }
         mutableState.update { state ->
             state.copy(
                 createDialog = if (state.createDialog == null) {
@@ -109,6 +136,7 @@ internal class ListEditorViewModel(
     }
 
     private fun dismissCreateDialog() {
+        improvementController.cancelSuggestions()
         mutableState.updateUnlessSubmitting { state -> state.copy(createDialog = null) }
     }
 
@@ -122,28 +150,11 @@ internal class ListEditorViewModel(
                 )
             )
         }
-        loadSuggestions(name)
-    }
-
-    private fun loadSuggestions(query: String) {
-        suggestionsJob?.cancel()
-        if (query.isBlank()) return
-
-        suggestionsJob = viewModelScope.launch {
-            delay(SUGGESTIONS_DEBOUNCE_MILLIS)
-            runCatching {
-                interactor.findProductSuggestions(query, limit = 5)
-            }.onSuccess { suggestions ->
-                mutableState.update { state ->
-                    state.copy(
-                        createDialog = state.createDialog?.copy(suggestions = suggestions)
-                    )
-                }
-            }
-        }
+        improvementController.requestSuggestions(name)
     }
 
     private fun handleSuggestionSelected(name: String) {
+        improvementController.cancelSuggestions()
         mutableState.update { state ->
             state.copy(
                 createDialog = state.createDialog?.copy(
@@ -153,6 +164,10 @@ internal class ListEditorViewModel(
                 )
             )
         }
+    }
+
+    private fun dismissSuggestions() {
+        improvementController.dismissSuggestions()
     }
 
     private fun handleQuantityChanged(quantity: Int) {
@@ -329,6 +344,8 @@ internal class ListEditorViewModel(
     }
 
     private fun handleSortChanged(sortType: ShoppingItemSort) {
+        if (sortType == mutableState.value.sortType) return
+
         mutableState.update { it.copy(sortType = sortType) }
         observeShoppingItems(sortType)
     }
@@ -337,21 +354,6 @@ internal class ListEditorViewModel(
         mutableState.update { it.copy(showSortMenu = !it.showSortMenu) }
     }
 
-    private fun handleItemMoved(fromIndex: Int, toIndex: Int) {
-        val currentItems = mutableState.value.items.toMutableList()
-        if (fromIndex in currentItems.indices && toIndex in currentItems.indices) {
-            val item = currentItems.removeAt(fromIndex)
-            currentItems.add(toIndex, item)
-            mutableState.update { it.copy(items = currentItems) }
-            viewModelScope.launch {
-                runCatching {
-                    interactor.updatePositions(currentItems)
-                }.onFailure {
-                    effectChannel.trySend(ListEditorEffect.OperationFailed)
-                }
-            }
-        }
-    }
 }
 
 private inline fun MutableStateFlow<ListEditorUiState>.updateUnlessSubmitting(
@@ -359,5 +361,3 @@ private inline fun MutableStateFlow<ListEditorUiState>.updateUnlessSubmitting(
 ) {
     update { state -> if (state.isSubmitting) state else transform(state) }
 }
-
-private const val SUGGESTIONS_DEBOUNCE_MILLIS = 300L

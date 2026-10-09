@@ -12,7 +12,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import ru.practicum.shoppinglist.domain.api.interactor.ShoppingListInteractor
+import ru.practicum.shoppinglist.domain.api.model.AuthResult
 import ru.practicum.shoppinglist.domain.api.model.ShoppingList
+import ru.practicum.shoppinglist.domain.api.repository.AuthRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ShoppingListsViewModelTest {
@@ -24,7 +26,7 @@ class ShoppingListsViewModelTest {
     fun `lists flow produces filled state`() = runTest(mainDispatcherRule.testDispatcher) {
         val list = shoppingList(id = 7, name = "На неделю")
         val interactor = FakeShoppingListInteractor(listOf(list))
-        val viewModel = ShoppingListsViewModel(interactor)
+        val viewModel = createViewModel(interactor)
 
         advanceUntilIdle()
 
@@ -36,7 +38,7 @@ class ShoppingListsViewModelTest {
     fun `blank name is rejected without interactor call`() =
         runTest(mainDispatcherRule.testDispatcher) {
             val interactor = FakeShoppingListInteractor()
-            val viewModel = ShoppingListsViewModel(interactor)
+            val viewModel = createViewModel(interactor)
             advanceUntilIdle()
 
             viewModel.onAction(ShoppingListsAction.CreateListClicked)
@@ -51,7 +53,7 @@ class ShoppingListsViewModelTest {
     fun `valid list is created with trimmed name and selected icon`() =
         runTest(mainDispatcherRule.testDispatcher) {
             val interactor = FakeShoppingListInteractor()
-            val viewModel = ShoppingListsViewModel(interactor)
+            val viewModel = createViewModel(interactor)
             advanceUntilIdle()
 
             viewModel.onAction(ShoppingListsAction.CreateListClicked)
@@ -69,7 +71,7 @@ class ShoppingListsViewModelTest {
     fun `list is renamed with trimmed name and selected icon`() =
         runTest(mainDispatcherRule.testDispatcher) {
             val interactor = FakeShoppingListInteractor()
-            val viewModel = ShoppingListsViewModel(interactor)
+            val viewModel = createViewModel(interactor)
             val list = shoppingList(id = 9, name = "Old name")
             advanceUntilIdle()
 
@@ -88,7 +90,7 @@ class ShoppingListsViewModelTest {
     fun `delete cancellation leaves data unchanged and confirmation deletes`() =
         runTest(mainDispatcherRule.testDispatcher) {
             val interactor = FakeShoppingListInteractor()
-            val viewModel = ShoppingListsViewModel(interactor)
+            val viewModel = createViewModel(interactor)
             val list = shoppingList(id = 11, name = "Удалить")
             advanceUntilIdle()
 
@@ -103,6 +105,27 @@ class ShoppingListsViewModelTest {
             assertEquals(listOf(11L), interactor.deletedIds)
             assertNull(viewModel.state.value.listPendingDeletion)
         }
+
+    @Test
+    fun `duplicate action copies selected list`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val interactor = FakeShoppingListInteractor()
+            val viewModel = createViewModel(interactor)
+            advanceUntilIdle()
+
+            viewModel.onAction(ShoppingListsAction.DuplicateListClicked(15L))
+            advanceUntilIdle()
+
+            assertEquals(listOf(15L), interactor.duplicatedIds)
+            assertFalse(viewModel.state.value.isSubmitting)
+        }
+
+    private fun createViewModel(
+        interactor: ShoppingListInteractor,
+    ) = ShoppingListsViewModel(
+        interactor = interactor,
+        authRepository = FakeAuthRepository(),
+    )
 
     private fun shoppingList(id: Long, name: String) = ShoppingList(
         id = id,
@@ -122,6 +145,7 @@ private class FakeShoppingListInteractor(
     var lastCreatedIconKey: String? = null
     var updatedList: ShoppingList? = null
     val deletedIds = mutableListOf<Long>()
+    val duplicatedIds = mutableListOf<Long>()
 
     override fun observeShoppingLists(): Flow<List<ShoppingList>> = lists
 
@@ -144,5 +168,23 @@ private class FakeShoppingListInteractor(
         deletedIds += listId
     }
 
-    override suspend fun duplicateShoppingList(listId: Long): Long? = null
+    override suspend fun duplicateShoppingList(listId: Long): Long {
+        duplicatedIds += listId
+        return 43L
+    }
+}
+
+private class FakeAuthRepository : AuthRepository {
+    override suspend fun register(email: String, password: String): AuthResult =
+        AuthResult.Success
+
+    override suspend fun login(email: String, password: String): AuthResult =
+        AuthResult.Success
+
+    override suspend fun recoverPassword(email: String): AuthResult =
+        AuthResult.Success
+
+    override suspend fun restoreSession(): AuthResult = AuthResult.Success
+
+    override suspend fun logout() = Unit
 }

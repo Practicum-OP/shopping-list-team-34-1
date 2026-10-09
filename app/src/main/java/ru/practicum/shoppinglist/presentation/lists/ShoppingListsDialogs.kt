@@ -1,33 +1,29 @@
 package ru.practicum.shoppinglist.presentation.lists
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import ru.practicum.shoppinglist.R
 import ru.practicum.shoppinglist.domain.api.model.ShoppingList
@@ -94,6 +90,8 @@ private fun ListForm(
     onIconSelected: (String) -> Unit,
     onConfirmed: () -> Unit,
 ) {
+    var showIconPicker by rememberSaveable { mutableStateOf(false) }
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         OutlinedTextField(
             modifier = Modifier
@@ -120,12 +118,22 @@ private fun ListForm(
                 text = stringResource(R.string.lists_choose_icon),
                 style = MaterialTheme.typography.labelLarge,
             )
-            IconPicker(
+            ShoppingListIconPickerField(
                 selectedIconKey = iconKey,
                 enabled = !isSubmitting,
-                onIconSelected = onIconSelected,
+                onClick = { showIconPicker = true },
             )
         }
+    }
+    if (showIconPicker) {
+        ShoppingListIconPickerSheet(
+            selectedIconKey = iconKey,
+            onDismiss = { showIconPicker = false },
+            onIconSelected = { selectedIconKey ->
+                showIconPicker = false
+                onIconSelected(selectedIconKey)
+            },
+        )
     }
 }
 
@@ -172,57 +180,6 @@ internal fun RenameListDialog(
             }
         },
     )
-}
-
-@Composable
-private fun IconPicker(
-    selectedIconKey: String,
-    enabled: Boolean,
-    onIconSelected: (String) -> Unit,
-) {
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        items(
-            items = ShoppingListIconRegistry.options,
-            key = ShoppingListIconOption::key,
-        ) { option ->
-            val isSelected = option.key == selectedIconKey
-            Surface(
-                modifier = Modifier
-                    .size(48.dp)
-                    .selectable(
-                        selected = isSelected,
-                        enabled = enabled,
-                        role = Role.RadioButton,
-                        onClick = { onIconSelected(option.key) },
-                    ),
-                shape = CircleShape,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.surface
-                },
-                border = BorderStroke(
-                    width = if (isSelected) 2.dp else 1.dp,
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.outlineVariant
-                    },
-                ),
-            ) {
-                Icon(
-                    modifier = Modifier.padding(12.dp),
-                    imageVector = option.imageVector,
-                    contentDescription = stringResource(option.labelRes),
-                    tint = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                )
-            }
-        }
-    }
 }
 
 @Composable

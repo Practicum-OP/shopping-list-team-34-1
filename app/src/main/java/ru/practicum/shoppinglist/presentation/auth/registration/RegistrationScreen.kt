@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import ru.practicum.shoppinglist.presentation.auth.messageResource
@@ -18,9 +18,9 @@ internal fun RegistrationScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(viewModel, resources) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 RegistrationEffect.NavigateBack -> onNavigateBack()
@@ -31,7 +31,7 @@ internal fun RegistrationScreen(
 
                 is RegistrationEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
-                        context.getString(effect.error.messageResource),
+                        resources.getString(effect.error.messageResource),
                     )
                 }
             }

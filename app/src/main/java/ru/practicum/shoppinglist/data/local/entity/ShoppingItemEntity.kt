@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
         ),
     ],
     indices = [
-        Index(value = ["list_id"]),
+        Index(value = ["list_id", "position"]),
     ],
 )
 data class ShoppingItemEntity(

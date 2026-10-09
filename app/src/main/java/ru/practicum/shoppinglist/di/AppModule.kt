@@ -4,6 +4,7 @@ import androidx.room.Room
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import ru.practicum.shoppinglist.data.local.database.ShoppingListDatabase
+import ru.practicum.shoppinglist.data.local.database.ShoppingListMigrations
 import ru.practicum.shoppinglist.data.repository.ShoppingItemRepositoryImpl
 import ru.practicum.shoppinglist.data.repository.ShoppingListRepositoryImpl
 import ru.practicum.shoppinglist.domain.api.interactor.ShoppingItemInteractor
@@ -20,6 +21,8 @@ internal val appModule = module {
             androidContext(),
             ShoppingListDatabase::class.java,
             ShoppingListDatabase.DATABASE_NAME,
+        ).addMigrations(
+            ShoppingListMigrations.MIGRATION_1_2,
         ).build()
     }
 

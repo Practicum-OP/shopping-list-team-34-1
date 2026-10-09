@@ -15,8 +15,8 @@ import ru.practicum.shoppinglist.data.local.entity.ShoppingListEntity
         ShoppingItemEntity::class,
         ProductNameEntity::class,
     ],
-    version = 1,
-    exportSchema = false,
+    version = 2,
+    exportSchema = true,
 )
 internal abstract class ShoppingListDatabase : RoomDatabase() {
 
