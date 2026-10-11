@@ -21,12 +21,18 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -47,17 +53,22 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.practicum.shoppinglist.R
 import ru.practicum.shoppinglist.domain.api.model.ShoppingItem
 import ru.practicum.shoppinglist.domain.api.model.ShoppingItemSort
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -259,15 +270,15 @@ private fun SwipeableListItem(
         confirmValueChange = { dismissValue ->
             when (dismissValue) {
                 SwipeToDismissBoxValue.StartToEnd -> {
-                    // Свайп вправо - редактирование
                     onIntent(ListEditorIntent.ItemEditRequested(item.id))
                     false
                 }
+
                 SwipeToDismissBoxValue.EndToStart -> {
-                    // Свайп влево - удаление
                     onIntent(ListEditorIntent.DeleteItemRequested(item.id))
                     false
                 }
+
                 else -> false
             }
         },
@@ -357,6 +368,10 @@ private fun SortMenuBottomSheet(
     onIntent: (ListEditorIntent) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+
+    var sortDropdownExpanded by remember { mutableStateOf(false) }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -364,61 +379,202 @@ private fun SortMenuBottomSheet(
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            SortMenuItem(
-                text = stringResource(R.string.sort_manual),
-                isSelected = currentSortType == ShoppingItemSort.MANUAL,
-                onClick = {
-                    onIntent(ListEditorIntent.SortChanged(ShoppingItemSort.MANUAL))
-                    onDismiss()
+
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { sortDropdownExpanded = true }
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Sort,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column {
+                            Text(
+                                text = stringResource(R.string.sort_title),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = when (currentSortType) {
+                                    ShoppingItemSort.MANUAL -> stringResource(R.string.sort_manual)
+                                    ShoppingItemSort.ALPHABETICAL -> stringResource(R.string.sort_alphabetical)
+                                },
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                    Icon(
+                        imageVector = Icons.Filled.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
-            )
+
+                // DropdownMenu для выбора сортировки
+                DropdownMenu(
+                    expanded = sortDropdownExpanded,
+                    onDismissRequest = { sortDropdownExpanded = false },
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Sort,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.sort_alphabetical),
+                                    fontSize = 16.sp
+                                )
+                            }
+                        },
+                        onClick = {
+                            onIntent(ListEditorIntent.SortChanged(ShoppingItemSort.ALPHABETICAL))
+                            sortDropdownExpanded = false
+                        },
+                        trailingIcon = {
+                            if (currentSortType == ShoppingItemSort.ALPHABETICAL) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.DragIndicator, //TODO заменить иконки
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.sort_manual),
+                                    fontSize = 16.sp
+                                )
+                            }
+                        },
+                        onClick = {
+                            onIntent(ListEditorIntent.SortChanged(ShoppingItemSort.MANUAL))
+                            sortDropdownExpanded = false
+                        },
+                        trailingIcon = {
+                            if (currentSortType == ShoppingItemSort.MANUAL) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+
             HorizontalDivider(
                 color = MaterialTheme.colorScheme.outlineVariant,
             )
-            SortMenuItem(
-                text = stringResource(R.string.sort_alphabetical),
-                isSelected = currentSortType == ShoppingItemSort.ALPHABETICAL,
+
+            // Удалить все
+            ContextMenuItem(
+                text = stringResource(R.string.editor_delete_all),
+                icon = Icons.Filled.Delete,
+                iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                textColor = MaterialTheme.colorScheme.onSurface,
                 onClick = {
-                    onIntent(ListEditorIntent.SortChanged(ShoppingItemSort.ALPHABETICAL))
+                    onIntent(ListEditorIntent.ClearListClicked)
                     onDismiss()
                 }
             )
-            Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
+
+            // Очистить купленные
+            ContextMenuItem(
+                text = stringResource(R.string.editor_clear_purchased),
+                icon = Icons.Filled.DeleteSweep,
+                iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                textColor = MaterialTheme.colorScheme.onSurface,
+                onClick = {
+                    onIntent(ListEditorIntent.ClearCheckedClicked)
+                    onDismiss()
+                }
+            )
+
+            Spacer(
+                modifier = Modifier.height(
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                )
+            )
         }
     }
 }
 
 @Composable
-private fun SortMenuItem(
+private fun ContextMenuItem(
     text: String,
-    isSelected: Boolean,
+    icon: ImageVector,
+    iconTint: Color,
+    textColor: Color,
     onClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(24.dp)
+        )
+
         Text(
             text = text,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = textColor,
             fontSize = 16.sp,
         )
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Filled.CheckCircle,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-        }
     }
 }
-
 
 @Composable
 private fun EditorOverlays(

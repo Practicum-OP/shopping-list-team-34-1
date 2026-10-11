@@ -44,6 +44,8 @@ internal sealed interface ListEditorIntent {
     data class DeleteItemRequested(val itemId: Long) : ListEditorIntent
 
     data object ClearListClicked : ListEditorIntent
+
+    data object ClearCheckedClicked : ListEditorIntent
     data object ClearConfirmed : ListEditorIntent
     data object ClearCancelled : ListEditorIntent
 

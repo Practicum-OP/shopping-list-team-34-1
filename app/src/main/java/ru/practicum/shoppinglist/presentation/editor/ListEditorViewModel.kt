@@ -61,7 +61,8 @@ internal class ListEditorViewModel(
             is ListEditorIntent.DeleteCancelled -> dismissDeleteDialog()
             is ListEditorIntent.ItemToggled -> toggleItem(intent.itemId)
             is ListEditorIntent.DeleteItemRequested -> requestDeleteItem(intent.itemId)
-            is ListEditorIntent.ClearListClicked -> requestClearList()
+            is ListEditorIntent.ClearListClicked -> requestClearList() //TODO нужен метод для полной чистки
+            is ListEditorIntent.ClearCheckedClicked -> requestClearList()
             is ListEditorIntent.ClearConfirmed -> clearList()
             is ListEditorIntent.ClearCancelled -> dismissClearDialog()
             is ListEditorIntent.SortChanged -> handleSortChanged(intent.sortType)
