@@ -3,6 +3,7 @@ package ru.practicum.shoppinglist.presentation.lists
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -112,22 +113,29 @@ internal fun ShoppingListIconPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        dragHandle = {
+            Box(
+                modifier = Modifier.fillMaxWidth().height(36.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Surface(
+                    modifier = Modifier.size(width = 32.dp, height = 4.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {}
+            }
+        },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
+                .padding(top = 24.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.lists_choose_icon),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Spacer(Modifier.height(20.dp))
             ShoppingListIconGrid(
                 selectedIconKey = selectedIconKey,
                 onIconSelected = onIconSelected,
             )
-            Spacer(Modifier.height(24.dp))
         }
     }
 }
@@ -140,12 +148,11 @@ internal fun ShoppingListIconGrid(
     val resolvedSelectedKey = ShoppingListIconRegistry.resolve(selectedIconKey).key
     LazyVerticalGrid(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(328.dp)
+            .width(320.dp)
+            .height(368.dp)
             .testTag(ICON_PICKER_GRID_TEST_TAG),
         columns = GridCells.Fixed(ICON_GRID_COLUMNS),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         userScrollEnabled = false,
     ) {
         items(
@@ -168,43 +175,29 @@ private fun ShoppingListIconPickerOption(
     onClick: () -> Unit,
 ) {
     val label = stringResource(option.labelRes)
-    Surface(
-        modifier = Modifier
-            .size(48.dp)
-            .testTag(ICON_PICKER_OPTION_TEST_TAG_PREFIX + option.key)
-            .selectable(
-                selected = isSelected,
-                role = Role.RadioButton,
-                onClick = onClick,
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Surface(
+            modifier = Modifier
+                .size(48.dp)
+                .testTag(ICON_PICKER_OPTION_TEST_TAG_PREFIX + option.key)
+                .selectable(
+                    selected = isSelected,
+                    role = Role.RadioButton,
+                    onClick = onClick,
+                )
+                .semantics {
+                    contentDescription = label
+                },
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+        ) {
+            Icon(
+                modifier = Modifier.padding(12.dp),
+                imageVector = option.imageVector,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
             )
-            .semantics {
-                contentDescription = label
-            },
-        shape = CircleShape,
-        color = if (isSelected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.surface
-        },
-        border = BorderStroke(
-            width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.outlineVariant
-            },
-        ),
-    ) {
-        Icon(
-            modifier = Modifier.padding(12.dp),
-            imageVector = option.imageVector,
-            contentDescription = null,
-            tint = if (isSelected) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-        )
+        }
     }
 }
 

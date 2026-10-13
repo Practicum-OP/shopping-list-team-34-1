@@ -15,6 +15,8 @@ internal fun ShoppingListsScreen(
     viewModel: ShoppingListsViewModel = koinViewModel(),
     onListClick: (Long, String) -> Unit = { _, _ -> },
     onLogout: () -> Unit = {},
+    isDarkTheme: Boolean = false,
+    onToggleTheme: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -42,5 +44,7 @@ internal fun ShoppingListsScreen(
         snackbarHostState = snackbarHostState,
         onAction = viewModel::onAction,
         onItemClick = onListClick,
+        isDarkTheme = isDarkTheme,
+        onToggleTheme = onToggleTheme,
     )
 }

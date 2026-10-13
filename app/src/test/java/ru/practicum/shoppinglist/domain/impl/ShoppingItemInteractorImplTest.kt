@@ -56,6 +56,18 @@ class ShoppingItemInteractorImplTest {
         assertEquals(20, repository.suggestionLimit)
     }
 
+    @Test
+    fun `deleteAllItems delegates only for valid list id`() = runTest {
+        val repository = FakeShoppingItemRepository()
+        val interactor = ShoppingItemInteractorImpl(repository)
+
+        interactor.deleteAllItems(0)
+        interactor.deleteAllItems(-1)
+        interactor.deleteAllItems(4)
+
+        assertEquals(listOf(4L), repository.deletedAllListIds)
+    }
+
     private fun item(
         id: Long,
         listId: Long = 4,
@@ -73,6 +85,7 @@ class ShoppingItemInteractorImplTest {
 
 private class FakeShoppingItemRepository : ShoppingItemRepository {
     var updatedOrder: List<ShoppingItem> = emptyList()
+    val deletedAllListIds = mutableListOf<Long>()
     var suggestionQuery: String? = null
     var suggestionLimit: Int? = null
 
@@ -94,6 +107,10 @@ private class FakeShoppingItemRepository : ShoppingItemRepository {
     override suspend fun deleteShoppingItem(itemId: Long) = Unit
 
     override suspend fun deletePurchasedItems(listId: Long) = Unit
+
+    override suspend fun deleteAllItems(listId: Long) {
+        deletedAllListIds += listId
+    }
 
     override suspend fun updatePositions(shoppingItems: List<ShoppingItem>) {
         updatedOrder = shoppingItems

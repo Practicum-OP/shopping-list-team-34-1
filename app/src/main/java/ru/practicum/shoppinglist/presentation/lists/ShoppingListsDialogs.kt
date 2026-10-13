@@ -1,27 +1,34 @@
 package ru.practicum.shoppinglist.presentation.lists
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.MobileFriendly
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -41,8 +48,16 @@ internal fun CreateListDialog(
     onAction: (ShoppingListsAction) -> Unit,
 ) {
     AlertDialog(
-        modifier = Modifier.testTag(CREATE_DIALOG_TEST_TAG),
+        modifier = Modifier.width(312.dp).testTag(CREATE_DIALOG_TEST_TAG),
         onDismissRequest = { onAction(ShoppingListsAction.CreateDialogDismissed) },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.figma_lists_docs_add_on),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp),
+            )
+        },
         title = { Text(stringResource(R.string.lists_create_dialog_title)) },
         text = {
             ListForm(
@@ -91,11 +106,20 @@ private fun ListForm(
     onConfirmed: () -> Unit,
 ) {
     var showIconPicker by rememberSaveable { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
 
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        keyboard?.show()
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        ListFormIcon(iconKey, isSubmitting) { showIconPicker = true }
         OutlinedTextField(
             modifier = Modifier
-                .fillMaxWidth()
+                .weight(1f)
+                .focusRequester(focusRequester)
                 .testTag(nameTestTag),
             value = name,
             enabled = !isSubmitting,
@@ -113,17 +137,6 @@ private fun ListForm(
                 onDone = { onConfirmed() },
             ),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(
-                text = stringResource(R.string.lists_choose_icon),
-                style = MaterialTheme.typography.labelLarge,
-            )
-            ShoppingListIconPickerField(
-                selectedIconKey = iconKey,
-                enabled = !isSubmitting,
-                onClick = { showIconPicker = true },
-            )
-        }
     }
     if (showIconPicker) {
         ShoppingListIconPickerSheet(
@@ -138,13 +151,25 @@ private fun ListForm(
 }
 
 @Composable
+private fun ListFormIcon(iconKey: String, isSubmitting: Boolean, onClick: () -> Unit) {
+    val selectedOption = ShoppingListIconRegistry.resolve(iconKey)
+    IconButton(enabled = !isSubmitting, onClick = onClick) {
+        Icon(
+            imageVector = selectedOption.imageVector,
+            contentDescription = stringResource(R.string.lists_choose_icon),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
 internal fun RenameListDialog(
     state: RenameListDialogState,
     isSubmitting: Boolean,
     onAction: (ShoppingListsAction) -> Unit,
 ) {
     AlertDialog(
-        modifier = Modifier.testTag(RENAME_DIALOG_TEST_TAG),
+        modifier = Modifier.width(312.dp).testTag(RENAME_DIALOG_TEST_TAG),
         onDismissRequest = { onAction(ShoppingListsAction.RenameDialogDismissed) },
         title = { Text(stringResource(R.string.lists_rename_dialog_title)) },
         text = {
@@ -165,7 +190,7 @@ internal fun RenameListDialog(
         },
         confirmButton = {
             DialogConfirmButton(
-                label = stringResource(R.string.action_save),
+                label = stringResource(R.string.action_rename),
                 isSubmitting = isSubmitting,
                 isActionEnabled = state.name.isNotBlank(),
                 onClick = { onAction(ShoppingListsAction.RenameConfirmed) },
@@ -189,11 +214,11 @@ internal fun DeleteListDialog(
     onAction: (ShoppingListsAction) -> Unit,
 ) {
     AlertDialog(
-        modifier = Modifier.testTag(DELETE_DIALOG_TEST_TAG),
+        modifier = Modifier.width(312.dp).testTag(DELETE_DIALOG_TEST_TAG),
         onDismissRequest = { onAction(ShoppingListsAction.DeleteDialogDismissed) },
-        title = { Text(stringResource(R.string.lists_delete_dialog_title)) },
-        text = {
-            Text(stringResource(R.string.lists_delete_dialog_body, shoppingList.name))
+        icon = { Icon(Icons.Outlined.MobileFriendly, contentDescription = null) },
+        title = {
+            Text(stringResource(R.string.lists_delete_dialog_title, shoppingList.name))
         },
         confirmButton = {
             DialogConfirmButton(
@@ -215,19 +240,44 @@ internal fun DeleteListDialog(
 }
 
 @Composable
+internal fun DeleteAllListsDialog(
+    isSubmitting: Boolean,
+    onAction: (ShoppingListsAction) -> Unit,
+) {
+    AlertDialog(
+        modifier = Modifier.width(312.dp).testTag("delete_all_lists_dialog"),
+        onDismissRequest = { onAction(ShoppingListsAction.DeleteAllListsDismissed) },
+        icon = { Icon(Icons.Outlined.MobileFriendly, contentDescription = null) },
+        title = { Text(stringResource(R.string.lists_delete_all_dialog_title)) },
+        confirmButton = {
+            DialogConfirmButton(
+                label = stringResource(R.string.action_delete),
+                isSubmitting = isSubmitting,
+                isActionEnabled = true,
+                onClick = { onAction(ShoppingListsAction.DeleteAllListsConfirmed) },
+            )
+        },
+        dismissButton = {
+            TextButton(
+                enabled = !isSubmitting,
+                onClick = { onAction(ShoppingListsAction.DeleteAllListsDismissed) },
+            ) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        },
+    )
+}
+
+@Composable
 private fun DialogConfirmButton(
     label: String,
     isSubmitting: Boolean,
     isActionEnabled: Boolean,
     onClick: () -> Unit,
 ) {
-    Button(
+    TextButton(
         enabled = !isSubmitting && isActionEnabled,
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-        ),
     ) {
         if (isSubmitting) {
             CircularProgressIndicator(

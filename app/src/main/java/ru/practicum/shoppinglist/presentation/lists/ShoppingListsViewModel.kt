@@ -55,6 +55,9 @@ internal class ShoppingListsViewModel(
             is ShoppingListsAction.DeleteListClicked -> requestDeletion(action.shoppingList)
             ShoppingListsAction.DeleteDialogDismissed -> dismissDeleteDialog()
             ShoppingListsAction.DeleteConfirmed -> deleteList()
+            ShoppingListsAction.DeleteAllListsClicked -> requestDeleteAllLists()
+            ShoppingListsAction.DeleteAllListsDismissed -> dismissDeleteAllLists()
+            ShoppingListsAction.DeleteAllListsConfirmed -> deleteAllLists()
             ShoppingListsAction.LogoutClicked -> logout()
         }
     }
@@ -195,6 +198,35 @@ internal class ShoppingListsViewModel(
                 .onSuccess {
                     mutableState.update { state ->
                         state.copy(listPendingDeletion = null, isSubmitting = false)
+                    }
+                }
+                .onFailure { onOperationFailed() }
+        }
+    }
+
+    private fun requestDeleteAllLists() {
+        mutableState.update { state ->
+            if (state.isSubmitting || state.lists.isEmpty()) state
+            else state.copy(deleteAllListsRequested = true)
+        }
+    }
+
+    private fun dismissDeleteAllLists() {
+        mutableState.updateUnlessSubmitting { state ->
+            state.copy(deleteAllListsRequested = false)
+        }
+    }
+
+    private fun deleteAllLists() {
+        val currentState = mutableState.value
+        if (currentState.isSubmitting || !currentState.deleteAllListsRequested) return
+
+        mutableState.update { state -> state.copy(isSubmitting = true) }
+        viewModelScope.launch {
+            runCatching { interactor.deleteAllShoppingLists() }
+                .onSuccess {
+                    mutableState.update { state ->
+                        state.copy(deleteAllListsRequested = false, isSubmitting = false)
                     }
                 }
                 .onFailure { onOperationFailed() }

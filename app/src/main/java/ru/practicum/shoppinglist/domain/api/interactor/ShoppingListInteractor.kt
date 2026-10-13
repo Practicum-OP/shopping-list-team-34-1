@@ -20,5 +20,7 @@ interface ShoppingListInteractor {
 
     suspend fun deleteShoppingList(listId: Long)
 
+    suspend fun deleteAllShoppingLists()
+
     suspend fun duplicateShoppingList(listId: Long): Long?
 }

@@ -95,6 +95,10 @@ internal class ShoppingItemRepositoryImpl(
         shoppingItemDao.deletePurchased(listId)
     }
 
+    override suspend fun deleteAllItems(listId: Long) {
+        shoppingItemDao.deleteAllByListId(listId)
+    }
+
     override suspend fun updatePositions(
         shoppingItems: List<ShoppingItem>,
     ) {

@@ -17,7 +17,10 @@ import ru.practicum.shoppinglist.presentation.editor.ListEditorScreen
 import ru.practicum.shoppinglist.presentation.lists.ShoppingListsScreen
 
 @Composable
-internal fun ShoppingListNavHost() {
+internal fun ShoppingListNavHost(
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -25,7 +28,7 @@ internal fun ShoppingListNavHost() {
         startDestination = AppRoute.AUTH_GRAPH,
     ) {
         authGraph(navController)
-        shoppingListsDestination(navController)
+        shoppingListsDestination(navController, isDarkTheme, onToggleTheme)
         listEditorDestination(navController)
     }
 }
@@ -115,9 +118,13 @@ private fun NavGraphBuilder.passwordRecoveryDestination(
 
 private fun NavGraphBuilder.shoppingListsDestination(
     navController: NavHostController,
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
 ) {
     composable(route = AppRoute.SHOPPING_LISTS) {
         ShoppingListsScreen(
+            isDarkTheme = isDarkTheme,
+            onToggleTheme = onToggleTheme,
             onListClick = { listId: Long, listName: String ->
                 navController.navigate(
                     AppRoute.createListEditorRoute(

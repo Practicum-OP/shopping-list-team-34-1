@@ -52,6 +52,10 @@ internal class ShoppingListRepositoryImpl(
         shoppingListDao.deleteById(listId)
     }
 
+    override suspend fun deleteAllShoppingLists() {
+        shoppingListDao.deleteAll()
+    }
+
     override suspend fun duplicateShoppingList(
         listId: Long,
     ): Long? =

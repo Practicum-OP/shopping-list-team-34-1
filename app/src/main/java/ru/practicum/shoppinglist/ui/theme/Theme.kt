@@ -5,48 +5,58 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-
-private val DarkColorScheme = darkColorScheme(
-    primary = PracticumYellow,
-    onPrimary = PracticumInk,
-    primaryContainer = PracticumYellowContainer,
-    onPrimaryContainer = PracticumInk,
-    secondary = PracticumYellowContainer,
-    background = PracticumDarkBackground,
-    onBackground = PracticumDarkOnSurface,
-    surface = PracticumDarkSurface,
-    onSurface = PracticumDarkOnSurface,
-    surfaceVariant = PracticumDarkSurfaceVariant,
-    onSurfaceVariant = PracticumDarkOnSurface,
-    outline = PracticumDarkOutline,
-    error = PracticumError,
-)
+import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme = lightColorScheme(
-    primary = PracticumYellow,
-    onPrimary = PracticumInk,
-    primaryContainer = PracticumYellowContainer,
-    onPrimaryContainer = PracticumInk,
-    secondary = PracticumInk,
-    onSecondary = PracticumSurface,
-    background = PracticumBackground,
-    onBackground = PracticumInk,
-    surface = PracticumSurface,
-    onSurface = PracticumInk,
-    surfaceVariant = PracticumSurfaceVariant,
-    onSurfaceVariant = PracticumMuted,
-    outline = PracticumOutline,
-    error = PracticumError,
+    primary = DesignLightPrimary,
+    onPrimary = Color.White,
+    primaryContainer = DesignLightPrimaryContainer,
+    onPrimaryContainer = DesignLightOnPrimaryContainer,
+    secondary = DesignLightSecondary,
+    onSecondary = Color.White,
+    secondaryContainer = DesignLightSecondaryContainer,
+    onSecondaryContainer = DesignLightOnSecondaryContainer,
+    background = DesignLightBackground,
+    onBackground = DesignLightInk,
+    surface = DesignLightSurface,
+    onSurface = DesignLightOnSurface,
+    surfaceVariant = DesignLightSurfaceLow,
+    onSurfaceVariant = DesignLightOnSurfaceVariant,
+    outline = DesignLightOutline,
+    outlineVariant = DesignLightOutlineVariant,
+    error = DesignLightError,
+    onError = Color.White,
+)
+
+private val DarkColorScheme = darkColorScheme(
+    primary = DesignDarkPrimary,
+    onPrimary = DesignDarkOnPrimary,
+    primaryContainer = DesignDarkPrimaryContainer,
+    onPrimaryContainer = DesignDarkOnPrimaryContainer,
+    secondary = DesignDarkSecondary,
+    onSecondary = Color(0xFF332D41),
+    secondaryContainer = DesignDarkSecondaryContainer,
+    onSecondaryContainer = DesignDarkOnSecondaryContainer,
+    background = DesignDarkBackground,
+    onBackground = DesignDarkInk,
+    surface = DesignDarkSurface,
+    onSurface = DesignDarkOnSurface,
+    surfaceVariant = DesignDarkSurfaceLow,
+    onSurfaceVariant = DesignDarkOnSurfaceVariant,
+    outline = DesignDarkOutline,
+    outlineVariant = DesignDarkOutlineVariant,
+    error = DesignDarkError,
+    onError = Color(0xFF601410),
 )
 
 @Composable
 fun ShoppingListTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }

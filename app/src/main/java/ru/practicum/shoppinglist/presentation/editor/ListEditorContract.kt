@@ -22,6 +22,7 @@ internal data class ListEditorUiState(
     val createDialog: CreateItemDialogState? = null,
     val listPendingDeletion: ShoppingItem? = null,
     val showClearDialog: Boolean = false,
+    val clearPurchasedOnly: Boolean = false,
     val showSortMenu: Boolean = false,
     val sortType: ShoppingItemSort = ShoppingItemSort.MANUAL,
 )

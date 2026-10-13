@@ -242,6 +242,52 @@ class ListEditorViewModelTest {
             )
         }
 
+    @Test
+    fun `clear all confirmation removes every item`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val interactor = FakeShoppingItemInteractor()
+            val viewModel = createViewModel(interactor)
+            runCurrent()
+
+            viewModel.onIntent(ListEditorIntent.ClearListClicked)
+            assertTrue(viewModel.state.value.showClearDialog)
+            assertEquals(false, viewModel.state.value.clearPurchasedOnly)
+
+            viewModel.onIntent(ListEditorIntent.ClearConfirmed)
+            advanceUntilIdle()
+
+            assertEquals(listOf(LIST_ID), interactor.deletedAllListIds)
+            assertTrue(interactor.deletedPurchasedListIds.isEmpty())
+            assertTrue(viewModel.state.value.items.isEmpty())
+            assertEquals(false, viewModel.state.value.showClearDialog)
+        }
+
+    @Test
+    fun `clear purchased confirmation retains unpurchased items`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val interactor = FakeShoppingItemInteractor().apply {
+                manualItems.value = manualItems.value.map { item ->
+                    if (item.id == FIRST_ITEM_ID) item.copy(isPurchased = true) else item
+                }
+            }
+            val viewModel = createViewModel(interactor)
+            runCurrent()
+
+            viewModel.onIntent(ListEditorIntent.ClearCheckedClicked)
+            assertTrue(viewModel.state.value.clearPurchasedOnly)
+
+            viewModel.onIntent(ListEditorIntent.ClearConfirmed)
+            advanceUntilIdle()
+
+            assertEquals(listOf(LIST_ID), interactor.deletedPurchasedListIds)
+            assertTrue(interactor.deletedAllListIds.isEmpty())
+            assertEquals(
+                listOf(SECOND_ITEM_ID, THIRD_ITEM_ID),
+                viewModel.state.value.items.map(ShoppingItem::id),
+            )
+            assertEquals(false, viewModel.state.value.showClearDialog)
+        }
+
     private fun createViewModel(
         interactor: ShoppingItemInteractor,
     ): ListEditorViewModel = ListEditorViewModel(
@@ -274,6 +320,8 @@ private class FakeShoppingItemInteractor : ShoppingItemInteractor {
     val alphabeticalItems = MutableStateFlow(manualItems.value.reversed())
     val observedSorts = mutableListOf<ShoppingItemSort>()
     val updatedOrders = mutableListOf<List<ShoppingItem>>()
+    val deletedAllListIds = mutableListOf<Long>()
+    val deletedPurchasedListIds = mutableListOf<Long>()
     val suggestionQueries = mutableListOf<String>()
     var suggestions: List<String> = emptyList()
     var positionUpdateStarted: CompletableDeferred<Unit>? = null
@@ -309,7 +357,15 @@ private class FakeShoppingItemInteractor : ShoppingItemInteractor {
 
     override suspend fun deleteShoppingItem(itemId: Long) = Unit
 
-    override suspend fun deletePurchasedItems(listId: Long) = Unit
+    override suspend fun deletePurchasedItems(listId: Long) {
+        deletedPurchasedListIds += listId
+        manualItems.value = manualItems.value.filterNot(ShoppingItem::isPurchased)
+    }
+
+    override suspend fun deleteAllItems(listId: Long) {
+        deletedAllListIds += listId
+        manualItems.value = emptyList()
+    }
 
     override suspend fun updatePositions(
         shoppingItems: List<ShoppingItem>,

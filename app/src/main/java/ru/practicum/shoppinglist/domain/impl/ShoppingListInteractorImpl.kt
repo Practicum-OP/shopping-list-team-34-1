@@ -58,6 +58,10 @@ internal class ShoppingListInteractorImpl(
         repository.deleteShoppingList(listId)
     }
 
+    override suspend fun deleteAllShoppingLists() {
+        repository.deleteAllShoppingLists()
+    }
+
     override suspend fun duplicateShoppingList(
         listId: Long,
     ): Long? =

@@ -2,16 +2,18 @@ package ru.practicum.shoppinglist.presentation.editor
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -22,17 +24,21 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuBoxScope
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -65,12 +71,15 @@ internal fun CreateItemBottomSheet(
     )
 
     ModalBottomSheet(
-        modifier = Modifier.testTag(CREATE_SHEET_TEST_TAG),
+        modifier = Modifier
+            .padding(horizontal = 6.dp)
+            .testTag(CREATE_SHEET_TEST_TAG),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        shape = MaterialTheme.shapes.large,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        dragHandle = { EditorSheetDragHandle() },
     ) {
         CreateItemSheetContent(
             state = state,
@@ -91,85 +100,34 @@ private fun CreateItemSheetContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
     ) {
-        Text(
-            text = stringResource(
-                if (isEditing) {
-                    R.string.editor_edit_dialog_title
-                } else {
-                    R.string.editor_create_dialog_title
-                },
-            ),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
-
         ItemForm(
             state = state,
             isSubmitting = isSubmitting,
-            onIntent = onIntent,
-        )
-
-        SubmitItemButton(
-            state = state,
-            isSubmitting = isSubmitting,
             isEditing = isEditing,
-            onClick = {
-                onIntent(ListEditorIntent.ConfirmAddItem)
-            },
-        )
-
-        Spacer(
-            modifier = Modifier.height(
-                WindowInsets.navigationBars
-                    .asPaddingValues()
-                    .calculateBottomPadding(),
-            ),
+            onIntent = onIntent,
         )
     }
 }
 
 @Composable
-private fun SubmitItemButton(
-    state: CreateItemDialogState,
-    isSubmitting: Boolean,
-    isEditing: Boolean,
-    onClick: () -> Unit,
-) {
-    Button(
-        onClick = onClick,
-        enabled = !isSubmitting &&
-                state.name.isNotBlank() &&
-                state.quantity > 0,
+internal fun EditorSheetDragHandle() {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-        ),
-        shape = MaterialTheme.shapes.medium,
+            .height(36.dp),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        if (isSubmitting) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(18.dp),
-                strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.onPrimary,
-            )
-        } else {
-            Text(
-                text = stringResource(
-                    if (isEditing) {
-                        R.string.action_edit
-                    } else {
-                        R.string.action_add
-                    },
+        Box(
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .size(width = 32.dp, height = 4.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(2.dp),
                 ),
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
+        )
     }
 }
 
@@ -177,6 +135,7 @@ private fun SubmitItemButton(
 private fun ItemForm(
     state: CreateItemDialogState,
     isSubmitting: Boolean,
+    isEditing: Boolean,
     onIntent: (ListEditorIntent) -> Unit,
 ) {
     Column(
@@ -187,23 +146,75 @@ private fun ItemForm(
             isSubmitting = isSubmitting,
             onIntent = onIntent,
         )
+        ItemQuantityControls(state, isSubmitting, isEditing, onIntent)
+    }
+}
 
+@Composable
+private fun ItemQuantityControls(
+    state: CreateItemDialogState,
+    isSubmitting: Boolean,
+    isEditing: Boolean,
+    onIntent: (ListEditorIntent) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().height(64.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
         ItemQuantityField(
+            modifier = Modifier.weight(1f),
             quantity = state.quantity,
             showError = state.showQuantityError,
             isSubmitting = isSubmitting,
-            onQuantityChanged = {
-                onIntent(ListEditorIntent.QuantityChanged(it))
-            },
+            onQuantityChanged = { onIntent(ListEditorIntent.QuantityChanged(it)) },
         )
-
         MeasurementUnitField(
+            modifier = Modifier.weight(1f),
             selectedUnit = state.selectedUnit,
             isSubmitting = isSubmitting,
-            onUnitChanged = {
-                onIntent(ListEditorIntent.UnitChanged(it))
-            },
+            onUnitChanged = { onIntent(ListEditorIntent.UnitChanged(it)) },
         )
+        QuantityActionButtons(state, isSubmitting, isEditing, onIntent)
+    }
+}
+
+@Composable
+private fun QuantityActionButtons(
+    state: CreateItemDialogState,
+    isSubmitting: Boolean,
+    isEditing: Boolean,
+    onIntent: (ListEditorIntent) -> Unit,
+) {
+    Row {
+        IconButton(
+            onClick = {
+                onIntent(ListEditorIntent.QuantityChanged((state.quantity - 1).coerceAtLeast(1)))
+            },
+            enabled = !isSubmitting && state.quantity > 1,
+            modifier = Modifier.size(48.dp),
+        ) {
+            Icon(
+                Icons.Filled.Remove,
+                contentDescription = stringResource(R.string.editor_decrease_quantity),
+            )
+        }
+        IconButton(
+            onClick = { onIntent(ListEditorIntent.ConfirmAddItem) },
+            enabled = !isSubmitting && state.name.isNotBlank() && state.quantity > 0,
+            modifier = Modifier.size(48.dp),
+        ) {
+            if (isSubmitting) {
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+            } else {
+                Icon(
+                    Icons.Outlined.Add,
+                    contentDescription = stringResource(
+                        if (isEditing) R.string.action_edit else R.string.action_add,
+                    ),
+                )
+            }
+        }
     }
 }
 
@@ -216,6 +227,7 @@ private fun ItemNameField(
 ) {
     val suggestionsVisible = state.suggestions.isNotEmpty() && !isSubmitting
     ExposedDropdownMenuBox(
+        modifier = Modifier.fillMaxWidth(),
         expanded = suggestionsVisible,
         onExpandedChange = { expanded ->
             if (!expanded) {
@@ -242,6 +254,7 @@ private fun ExposedDropdownMenuBoxScope.ProductNameTextField(
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
+            .height(56.dp)
             .menuAnchor(
                 type = ExposedDropdownMenuAnchorType.PrimaryEditable,
                 enabled = !isSubmitting,
@@ -253,6 +266,7 @@ private fun ExposedDropdownMenuBoxScope.ProductNameTextField(
             onIntent(ListEditorIntent.NameChanged(name))
         },
         label = { Text(stringResource(R.string.editor_name_label)) },
+        placeholder = { Text(stringResource(R.string.editor_product_placeholder)) },
         isError = state.showNameError,
         supportingText = if (state.showNameError) {
             { Text(stringResource(R.string.editor_name_required)) }
@@ -294,13 +308,14 @@ private fun ExposedDropdownMenuBoxScope.ProductSuggestionsMenu(
 
 @Composable
 private fun ItemQuantityField(
+    modifier: Modifier,
     quantity: Int,
     showError: Boolean,
     isSubmitting: Boolean,
     onQuantityChanged: (Int) -> Unit,
 ) {
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.height(64.dp),
         value = quantity.toString(),
         enabled = !isSubmitting,
         onValueChange = { value ->
@@ -327,6 +342,7 @@ private fun ItemQuantityField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MeasurementUnitField(
+    modifier: Modifier,
     selectedUnit: MeasurementUnit,
     isSubmitting: Boolean,
     onUnitChanged: (MeasurementUnit) -> Unit,
@@ -334,6 +350,7 @@ private fun MeasurementUnitField(
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
+        modifier = modifier,
         expanded = expanded,
         onExpandedChange = {
             expanded = !expanded
@@ -354,6 +371,7 @@ private fun MeasurementUnitField(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .height(64.dp)
                 .menuAnchor(
                     ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                 ),
@@ -389,8 +407,15 @@ internal fun DeleteItemDialog(
     AlertDialog(
         modifier = Modifier.testTag(DELETE_DIALOG_TEST_TAG),
         onDismissRequest = { onIntent(ListEditorIntent.DeleteCancelled) },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         shape = MaterialTheme.shapes.extraLarge,
+        icon = {
+            Icon(
+                imageVector = Icons.Filled.Error,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
         title = {
             Text(
                 text = stringResource(R.string.editor_delete_dialog_title),
@@ -412,11 +437,12 @@ internal fun DeleteItemDialog(
             )
         },
         dismissButton = {
-            TextButton(
+            Button(
                 enabled = !isSubmitting,
                 onClick = { onIntent(ListEditorIntent.DeleteCancelled) },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             ) {
                 Text(stringResource(R.string.action_cancel))
@@ -428,30 +454,37 @@ internal fun DeleteItemDialog(
 @Composable
 internal fun ClearListDialog(
     isSubmitting: Boolean,
+    purchasedOnly: Boolean,
     onIntent: (ListEditorIntent) -> Unit,
 ) {
+    val titleRes = if (purchasedOnly) {
+        R.string.editor_clear_purchased_dialog_title
+    } else {
+        R.string.editor_clear_dialog_title
+    }
     AlertDialog(
         modifier = Modifier.testTag(CLEAR_DIALOG_TEST_TAG),
         onDismissRequest = {
             onIntent(ListEditorIntent.ClearCancelled)
         },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         shape = MaterialTheme.shapes.extraLarge,
-        title = {
-            Text(
-                text = stringResource(R.string.editor_clear_dialog_title),
-                color = MaterialTheme.colorScheme.onSurface,
+        icon = {
+            Icon(
+                imageVector = Icons.Filled.Error,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
-        text = {
+        title = {
             Text(
-                text = stringResource(R.string.editor_clear_dialog_body),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = stringResource(titleRes),
+                color = MaterialTheme.colorScheme.onSurface,
             )
         },
         confirmButton = {
             DialogConfirmButton(
-                label = stringResource(R.string.action_yes),
+                label = stringResource(R.string.action_delete),
                 isSubmitting = isSubmitting,
                 isActionEnabled = true,
                 onClick = {
@@ -460,19 +493,26 @@ internal fun ClearListDialog(
             )
         },
         dismissButton = {
-            TextButton(
-                enabled = !isSubmitting,
-                onClick = {
-                    onIntent(ListEditorIntent.ClearCancelled)
-                },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary,
-                ),
-            ) {
-                Text(stringResource(R.string.action_cancel))
-            }
+            ClearDialogDismissButton(isSubmitting, onIntent)
         },
     )
+}
+
+@Composable
+private fun ClearDialogDismissButton(
+    isSubmitting: Boolean,
+    onIntent: (ListEditorIntent) -> Unit,
+) {
+    Button(
+        enabled = !isSubmitting,
+        onClick = { onIntent(ListEditorIntent.ClearCancelled) },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ),
+    ) {
+        Text(stringResource(R.string.action_cancel))
+    }
 }
 
 @Composable
@@ -486,8 +526,8 @@ private fun DialogConfirmButton(
         enabled = !isSubmitting && isActionEnabled,
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         shape = MaterialTheme.shapes.extraLarge,
     ) {
@@ -495,7 +535,7 @@ private fun DialogConfirmButton(
             CircularProgressIndicator(
                 modifier = Modifier.size(18.dp),
                 strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.onError,
+                color = MaterialTheme.colorScheme.onPrimary,
             )
         } else {
             Text(label)

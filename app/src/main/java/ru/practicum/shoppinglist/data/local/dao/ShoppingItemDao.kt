@@ -85,4 +85,7 @@ internal interface ShoppingItemDao {
                 "WHERE list_id = :listId AND is_purchased = 1",
     )
     suspend fun deletePurchased(listId: Long)
+
+    @Query("DELETE FROM shopping_items WHERE list_id = :listId")
+    suspend fun deleteAllByListId(listId: Long)
 }

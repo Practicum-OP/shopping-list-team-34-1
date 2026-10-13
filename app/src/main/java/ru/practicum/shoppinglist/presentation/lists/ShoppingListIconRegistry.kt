@@ -3,19 +3,19 @@ package ru.practicum.shoppinglist.presentation.lists
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ListAlt
-import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.BeachAccess
-import androidx.compose.material.icons.rounded.Bed
 import androidx.compose.material.icons.rounded.Cake
 import androidx.compose.material.icons.rounded.Celebration
 import androidx.compose.material.icons.rounded.Checkroom
+import androidx.compose.material.icons.rounded.ChildCare
 import androidx.compose.material.icons.rounded.ChildFriendly
+import androidx.compose.material.icons.rounded.Construction
 import androidx.compose.material.icons.rounded.Devices
+import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.DownhillSkiing
-import androidx.compose.material.icons.rounded.EmojiEmotions
 import androidx.compose.material.icons.rounded.Extension
-import androidx.compose.material.icons.rounded.Handyman
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.ImportContacts
 import androidx.compose.material.icons.rounded.Liquor
 import androidx.compose.material.icons.rounded.LocalFlorist
 import androidx.compose.material.icons.rounded.Luggage
@@ -49,7 +49,7 @@ internal object ShoppingListIconRegistry {
         ShoppingListIconOption("shopping_cart", Icons.Rounded.ShoppingCart, R.string.list_icon_cart),
         ShoppingListIconOption("shopping_bag", Icons.Rounded.ShoppingBag, R.string.list_icon_bag),
         ShoppingListIconOption("local_florist", Icons.Rounded.LocalFlorist, R.string.list_icon_florist),
-        ShoppingListIconOption("handyman", Icons.Rounded.Handyman, R.string.list_icon_handyman),
+        ShoppingListIconOption("handyman", Icons.Rounded.Construction, R.string.list_icon_handyman),
         ShoppingListIconOption("celebration", Icons.Rounded.Celebration, R.string.list_icon_party),
         ShoppingListIconOption("cake", Icons.Rounded.Cake, R.string.list_icon_cake),
         ShoppingListIconOption("redeem", Icons.Rounded.Redeem, R.string.list_icon_redeem),
@@ -79,7 +79,7 @@ internal object ShoppingListIconRegistry {
         ),
         ShoppingListIconOption(
             "emoji_emotions",
-            Icons.Rounded.EmojiEmotions,
+            Icons.Rounded.ChildCare,
             R.string.list_icon_emoji_emotions,
         ),
         ShoppingListIconOption(
@@ -89,7 +89,7 @@ internal object ShoppingListIconRegistry {
         ),
         ShoppingListIconOption("palette", Icons.Rounded.Palette, R.string.list_icon_palette),
         ShoppingListIconOption("checkroom", Icons.Rounded.Checkroom, R.string.list_icon_checkroom),
-        ShoppingListIconOption("bed", Icons.Rounded.Bed, R.string.list_icon_bed),
+        ShoppingListIconOption("bed", Icons.Rounded.DirectionsCar, R.string.list_icon_bed),
         ShoppingListIconOption("luggage", Icons.Rounded.Luggage, R.string.list_icon_luggage),
         ShoppingListIconOption("medication", Icons.Rounded.Medication, R.string.list_icon_medication),
         ShoppingListIconOption("food", Icons.Rounded.Restaurant, R.string.list_icon_food),
@@ -100,7 +100,7 @@ internal object ShoppingListIconRegistry {
         ),
         ShoppingListIconOption(
             "menu_book",
-            Icons.AutoMirrored.Rounded.MenuBook,
+            Icons.Rounded.ImportContacts,
             R.string.list_icon_menu_book,
         ),
         ShoppingListIconOption(
