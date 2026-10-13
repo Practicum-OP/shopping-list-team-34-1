@@ -94,10 +94,15 @@ import ru.practicum.shoppinglist.R
 import ru.practicum.shoppinglist.domain.api.model.ShoppingList
 import kotlin.math.roundToInt
 
-private val LIST_SWIPE_ACTION_WIDTH = 48.dp
-private val LIST_SWIPE_REVEAL_WIDTH = 144.dp
+private val LIST_SWIPE_ICON_SIZE = 40.dp
+private val LIST_SWIPE_ACTION_GAP = 8.dp
+private val LIST_SWIPE_END_PADDING = 16.dp
+private val LIST_SWIPE_ITEM_GAP = 16.dp
+private val LIST_SWIPE_REVEAL_WIDTH = LIST_SWIPE_ICON_SIZE * 3 +
+        LIST_SWIPE_ACTION_GAP * 2 + LIST_SWIPE_END_PADDING + LIST_SWIPE_ITEM_GAP
 internal const val SHOPPING_LIST_CARD_TEST_TAG_PREFIX = "shopping_list_card_"
 internal const val SHOPPING_LIST_SWIPE_TEST_TAG_PREFIX = "shopping_list_swipe_"
+private val LIST_SWIPE_ICON_INNER_SIZE = 24.dp
 
 private enum class ListSwipeValue {
     Covered,
@@ -750,8 +755,9 @@ private fun ListSwipeActions(
 ) {
     Row(
         modifier = Modifier
-            .height(48.dp),
-        horizontalArrangement = Arrangement.End,
+            .height(LIST_SWIPE_ICON_SIZE)
+            .padding(end = LIST_SWIPE_END_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(LIST_SWIPE_ACTION_GAP),
     ) {
         SwipeAction(
             icon = Icons.Rounded.Edit,
@@ -787,7 +793,7 @@ private fun SwipeAction(
 ) {
     Box(
         modifier = Modifier
-            .size(LIST_SWIPE_ACTION_WIDTH)
+            .size(LIST_SWIPE_ICON_SIZE)
             .clip(CircleShape)
             .background(containerColor)
             .clickable(onClick = onClick),
@@ -797,6 +803,7 @@ private fun SwipeAction(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = contentColor,
+            modifier = Modifier.size(LIST_SWIPE_ICON_INNER_SIZE),
         )
     }
 }
