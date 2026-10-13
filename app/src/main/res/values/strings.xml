@@ -5,9 +5,9 @@
     <string name="editor_operation_failed">Операция не удалась</string>
 
     <string name="editor_empty_title">В списке покупок пока пусто</string>
-    <string name="editor_empty_subtitle">Нажмите на кнопку + ниже, чтобы добавить товары</string>
+    <string name="editor_empty_subtitle">Нажмите на кнопку + ниже,\nчтобы добавить товары</string>
 
-    <string name="editor_create">Создать</string>
+    <string name="editor_create">Добавить товар</string>
     <string name="action_add">Добавить</string>
     <string name="action_edit">Изменить</string>
 
@@ -15,7 +15,9 @@
 
     <string name="editor_create_dialog_title">Новый товар</string>
     <string name="editor_edit_dialog_title">Редактировать</string>
-    <string name="editor_name_label">Название</string>
+    <string name="editor_name_label">Товар</string>
+    <string name="editor_product_placeholder">Добавить новый товар</string>
+    <string name="editor_decrease_quantity">Уменьшить количество</string>
     <string name="editor_name_required">Введите название товара</string>
     <string name="editor_quantity_label">Количество</string>
     <string name="editor_quantity_required">Введите количество</string>
@@ -23,12 +25,14 @@
     <string name="editor_delete_dialog_title">Удалить товар?</string>
     <string name="editor_delete_dialog_body">Вы уверены, что хотите удалить \"%s\"?</string>
 
-    <string name="editor_clear_dialog_title">Очистить список?</string>
+    <string name="editor_clear_dialog_title">Удалить все товары?</string>
     <string name="editor_clear_dialog_body">Вы уверены, что хотите удалить все товары из этого списка?</string>
+    <string name="editor_clear_purchased_dialog_title">Удалить все купленные товары?</string>
+    <string name="editor_clear_purchased_dialog_body">Вы уверены, что хотите удалить все купленные товары из этого списка?</string>
     <string name="navigate_back">Назад</string>
 
 
-    <string name="editor_unit_label">Ед. изм.</string>
+    <string name="editor_unit_label">Единицы</string>
     <string name="unit_piece_short">шт</string>
     <string name="unit_kilogram_short">кг</string>
     <string name="unit_liter_short">л</string>
@@ -40,7 +44,7 @@
     <string name="drag_handle">Перетащить</string>
     <string name="menu">Меню</string>
 
-    <string name="sort_manual">Ручная сортировка</string>
+    <string name="sort_manual">Пользовательская</string>
     <string name="sort_alphabetical">По алфавиту</string>
 
     <string name="login_title">Список покупок</string>

@@ -120,6 +120,29 @@ class ShoppingListsViewModelTest {
             assertFalse(viewModel.state.value.isSubmitting)
         }
 
+    @Test
+    fun `delete all lists requires confirmation and clears every list`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val interactor = FakeShoppingListInteractor(
+                listOf(shoppingList(id = 1, name = "Продукты")),
+            )
+            val viewModel = createViewModel(interactor)
+            advanceUntilIdle()
+
+            viewModel.onAction(ShoppingListsAction.DeleteAllListsClicked)
+            assertTrue(viewModel.state.value.deleteAllListsRequested)
+            viewModel.onAction(ShoppingListsAction.DeleteAllListsDismissed)
+            assertEquals(0, interactor.deleteAllCalls)
+
+            viewModel.onAction(ShoppingListsAction.DeleteAllListsClicked)
+            viewModel.onAction(ShoppingListsAction.DeleteAllListsConfirmed)
+            advanceUntilIdle()
+
+            assertEquals(1, interactor.deleteAllCalls)
+            assertTrue(viewModel.state.value.lists.isEmpty())
+            assertFalse(viewModel.state.value.deleteAllListsRequested)
+        }
+
     private fun createViewModel(
         interactor: ShoppingListInteractor,
     ) = ShoppingListsViewModel(
@@ -145,6 +168,7 @@ private class FakeShoppingListInteractor(
     var lastCreatedIconKey: String? = null
     var updatedList: ShoppingList? = null
     val deletedIds = mutableListOf<Long>()
+    var deleteAllCalls = 0
     val duplicatedIds = mutableListOf<Long>()
 
     override fun observeShoppingLists(): Flow<List<ShoppingList>> = lists
@@ -166,6 +190,11 @@ private class FakeShoppingListInteractor(
 
     override suspend fun deleteShoppingList(listId: Long) {
         deletedIds += listId
+    }
+
+    override suspend fun deleteAllShoppingLists() {
+        deleteAllCalls += 1
+        lists.value = emptyList()
     }
 
     override suspend fun duplicateShoppingList(listId: Long): Long {

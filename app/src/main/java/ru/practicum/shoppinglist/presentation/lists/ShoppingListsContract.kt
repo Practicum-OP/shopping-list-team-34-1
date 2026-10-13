@@ -22,6 +22,7 @@ internal data class ShoppingListsUiState(
     val createDialog: CreateListDialogState? = null,
     val renameDialog: RenameListDialogState? = null,
     val listPendingDeletion: ShoppingList? = null,
+    val deleteAllListsRequested: Boolean = false,
     val isSubmitting: Boolean = false,
     val isLoggingOut: Boolean = false,
 )
@@ -41,6 +42,9 @@ internal sealed interface ShoppingListsAction {
     data class DeleteListClicked(val shoppingList: ShoppingList) : ShoppingListsAction
     data object DeleteDialogDismissed : ShoppingListsAction
     data object DeleteConfirmed : ShoppingListsAction
+    data object DeleteAllListsClicked : ShoppingListsAction
+    data object DeleteAllListsDismissed : ShoppingListsAction
+    data object DeleteAllListsConfirmed : ShoppingListsAction
     data object LogoutClicked : ShoppingListsAction
 }
 

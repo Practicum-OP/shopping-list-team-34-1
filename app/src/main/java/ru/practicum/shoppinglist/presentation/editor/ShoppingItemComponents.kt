@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.practicum.shoppinglist.R
 import ru.practicum.shoppinglist.domain.api.model.ShoppingItem
+import java.math.BigDecimal
 
 private const val PURCHASED_CONTENT_ALPHA = 0.6f
 
@@ -272,7 +273,7 @@ private fun shoppingItemColors(
         background = if (isDragging) {
             MaterialTheme.colorScheme.surfaceVariant
         } else {
-            MaterialTheme.colorScheme.background
+            MaterialTheme.colorScheme.surface
         },
     )
 }
@@ -285,7 +286,7 @@ private fun PurchaseStatusIcon(
     val icon = if (isPurchased) {
         Icons.Filled.CheckCircle
     } else {
-        Icons.Filled.Circle
+        Icons.Outlined.RadioButtonUnchecked
     }
 
     val description = if (isPurchased) {
@@ -331,16 +332,18 @@ private fun ShoppingItemText(
             maxLines = 1,
         )
 
-        Text(
-            text = "${item.quantity} ${
-                stringResource(
-                    item.unit?.getShortNameRes()
-                        ?: R.string.unit_piece_short,
-                )
-            }",
-            color = quantityColor,
-            fontSize = 14.sp,
-        )
+        item.quantity?.let { quantity ->
+            Text(
+                text = "${BigDecimal.valueOf(quantity).stripTrailingZeros().toPlainString()} ${
+                    stringResource(
+                        item.unit?.getShortNameRes()
+                            ?: R.string.unit_piece_short,
+                    )
+                }",
+                color = quantityColor,
+                fontSize = 14.sp,
+            )
+        }
     }
 }
 

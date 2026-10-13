@@ -1,7 +1,7 @@
 package ru.practicum.shoppinglist.presentation.auth.login
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,14 +12,12 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -29,12 +27,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -63,7 +63,7 @@ internal fun LoginContent(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(56.dp))
+            Spacer(Modifier.height(24.dp))
             LoginHeader()
             Spacer(Modifier.height(32.dp))
             LoginForm(state = state, onIntent = onIntent)
@@ -74,30 +74,17 @@ internal fun LoginContent(
 
 @Composable
 private fun LoginHeader() {
-    Surface(
-        modifier = Modifier.size(72.dp),
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.primaryContainer,
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = Icons.Outlined.ShoppingCart,
-                contentDescription = null,
-                modifier = Modifier.size(36.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-        }
-    }
-
-    Spacer(Modifier.height(20.dp))
-
-    Text(
-        text = stringResource(R.string.login_title),
-        style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onBackground,
+    Image(
+        painter = painterResource(R.drawable.figma_brand_logo),
+        contentDescription = stringResource(R.string.login_title),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(74.dp),
+        contentScale = ContentScale.Fit,
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
     )
 
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(24.dp))
 
     Text(
         text = stringResource(R.string.login_subtitle),

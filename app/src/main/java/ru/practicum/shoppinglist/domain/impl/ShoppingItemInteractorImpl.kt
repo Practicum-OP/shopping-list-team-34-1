@@ -101,6 +101,12 @@ internal class ShoppingItemInteractorImpl(
         }
     }
 
+    override suspend fun deleteAllItems(listId: Long) {
+        if (listId > 0) {
+            repository.deleteAllItems(listId)
+        }
+    }
+
     override suspend fun updatePositions(
         shoppingItems: List<ShoppingItem>,
     ) {

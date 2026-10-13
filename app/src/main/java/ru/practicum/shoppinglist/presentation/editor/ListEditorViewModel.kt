@@ -61,8 +61,8 @@ internal class ListEditorViewModel(
             is ListEditorIntent.DeleteCancelled -> dismissDeleteDialog()
             is ListEditorIntent.ItemToggled -> toggleItem(intent.itemId)
             is ListEditorIntent.DeleteItemRequested -> requestDeleteItem(intent.itemId)
-            is ListEditorIntent.ClearListClicked -> requestClearList() //TODO нужен метод для полной чистки
-            is ListEditorIntent.ClearCheckedClicked -> requestClearList()
+            is ListEditorIntent.ClearListClicked -> requestClearList(purchasedOnly = false)
+            is ListEditorIntent.ClearCheckedClicked -> requestClearList(purchasedOnly = true)
             is ListEditorIntent.ClearConfirmed -> clearList()
             is ListEditorIntent.ClearCancelled -> dismissClearDialog()
             is ListEditorIntent.SortChanged -> handleSortChanged(intent.sortType)
@@ -320,22 +320,35 @@ internal class ListEditorViewModel(
         }
     }
 
-    private fun requestClearList() {
-        mutableState.update { state -> state.copy(showClearDialog = true) }
+    private fun requestClearList(purchasedOnly: Boolean) {
+        mutableState.update { state ->
+            state.copy(showClearDialog = true, clearPurchasedOnly = purchasedOnly)
+        }
     }
 
     private fun dismissClearDialog() {
-        mutableState.updateUnlessSubmitting { state -> state.copy(showClearDialog = false) }
+        mutableState.updateUnlessSubmitting { state ->
+            state.copy(showClearDialog = false, clearPurchasedOnly = false)
+        }
     }
 
     private fun clearList() {
+        val purchasedOnly = mutableState.value.clearPurchasedOnly
         mutableState.update { state -> state.copy(isSubmitting = true) }
         viewModelScope.launch {
             runCatching {
-                interactor.deletePurchasedItems(listId = listId)
+                if (purchasedOnly) {
+                    interactor.deletePurchasedItems(listId = listId)
+                } else {
+                    interactor.deleteAllItems(listId = listId)
+                }
             }.onSuccess {
                 mutableState.update { state ->
-                    state.copy(isSubmitting = false, showClearDialog = false)
+                    state.copy(
+                        isSubmitting = false,
+                        showClearDialog = false,
+                        clearPurchasedOnly = false,
+                    )
                 }
             }.onFailure {
                 mutableState.update { state -> state.copy(isSubmitting = false) }

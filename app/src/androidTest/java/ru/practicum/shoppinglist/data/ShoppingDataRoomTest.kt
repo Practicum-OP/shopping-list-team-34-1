@@ -113,6 +113,79 @@ class ShoppingDataRoomTest {
     }
 
     @Test
+    fun deleteAllItemsRemovesPurchasedAndUnpurchasedOnlyFromTargetList() = runBlocking {
+        val targetListId = insertList("Продукты", "food")
+        val otherListId = insertList("Дом", "home")
+        database.shoppingItemDao().insert(item(targetListId, "Молоко", null, null, false, 0))
+        database.shoppingItemDao().insert(item(targetListId, "Хлеб", null, null, true, 1))
+        database.shoppingItemDao().insert(item(otherListId, "Лампа", null, null, false, 0))
+
+        shoppingItemRepository.deleteAllItems(targetListId)
+
+        assertEquals(
+            emptyList<ShoppingItemEntity>(),
+            database.shoppingItemDao().getByListId(targetListId),
+        )
+        assertEquals(
+            listOf("Лампа"),
+            database.shoppingItemDao().getByListId(otherListId).map(ShoppingItemEntity::name),
+        )
+    }
+
+    @Test
+    fun deleteAllShoppingListsCascadesToItemsAndPreservesProductSuggestions() = runBlocking {
+        val firstListId = insertList("Продукты", "food")
+        val secondListId = insertList("Дом", "home")
+        shoppingItemRepository.addShoppingItem(firstListId, "Молоко", null, null)
+        shoppingItemRepository.addShoppingItem(secondListId, "Лампа", null, null)
+
+        shoppingListRepository.deleteAllShoppingLists()
+
+        assertEquals(
+            emptyList<ShoppingListEntity>(),
+            database.shoppingListDao().observeAll().first(),
+        )
+        assertEquals(
+            emptyList<ShoppingItemEntity>(),
+            database.shoppingItemDao().getByListId(firstListId),
+        )
+        assertEquals(
+            emptyList<ShoppingItemEntity>(),
+            database.shoppingItemDao().getByListId(secondListId),
+        )
+        assertEquals(listOf("Молоко"), shoppingItemRepository.findProductSuggestions("Мо", 10))
+    }
+
+    @Test
+    fun deleteAllShoppingListsRollsBackIfOneDeletionFails() = runBlocking {
+        val firstListId = insertList("Продукты", "food")
+        val blockedListId = insertList("Дом", "home")
+        database.shoppingItemDao().insert(item(firstListId, "Молоко", null, null, false, 0))
+        database.shoppingItemDao().insert(item(blockedListId, "Лампа", null, null, false, 0))
+        database.openHelper.writableDatabase.execSQL(
+            """
+            CREATE TRIGGER reject_list_deletion
+            BEFORE DELETE ON shopping_lists
+            WHEN OLD.id = $blockedListId
+            BEGIN
+                SELECT RAISE(ABORT, 'delete rejected');
+            END
+            """.trimIndent(),
+        )
+
+        assertThrows(RuntimeException::class.java) {
+            runBlocking { shoppingListRepository.deleteAllShoppingLists() }
+        }
+
+        assertEquals(
+            setOf(firstListId, blockedListId),
+            database.shoppingListDao().observeAll().first().map(ShoppingListEntity::id).toSet(),
+        )
+        assertEquals(1, database.shoppingItemDao().getByListId(firstListId).size)
+        assertEquals(1, database.shoppingItemDao().getByListId(blockedListId).size)
+    }
+
+    @Test
     fun updatePositionsChangesOnlyOrderAndRejectsPartialLists() = runBlocking {
         val listId = insertList("Порядок", "default")
         val firstId = database.shoppingItemDao().insert(

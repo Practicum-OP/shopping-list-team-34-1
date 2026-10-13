@@ -32,6 +32,8 @@ interface ShoppingItemRepository {
 
     suspend fun deletePurchasedItems(listId: Long)
 
+    suspend fun deleteAllItems(listId: Long)
+
     suspend fun updatePositions(
         shoppingItems: List<ShoppingItem>,
     )
