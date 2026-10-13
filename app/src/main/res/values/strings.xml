@@ -76,4 +76,7 @@
     <string name="password_recovery_success">Запрос на восстановление пароля отправлен</string>
 
     <string name="auth_logout">Выйти из аккаунта</string>
+    <string name="editor_clear_purchased">Очистить купленные</string>
+    <string name="editor_delete_all">Удалить все</string>
+    <string name="sort_title">Сортировка</string>
 </resources>
