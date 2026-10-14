@@ -101,8 +101,6 @@ import ru.practicum.shoppinglist.domain.api.model.ShoppingItem
 import ru.practicum.shoppinglist.domain.api.model.ShoppingItemSort
 import kotlin.math.roundToInt
 
-private val EditorMenuLight = Color(0xFFFFF1E7)
-private val EditorMenuDark = Color(0xFF211A14)
 
 private val FAB_SIZE = 56.dp
 private val FAB_END_PADDING = 16.dp
@@ -690,7 +688,7 @@ private fun SortMenuBottomSheet(
         modifier = Modifier.padding(horizontal = 6.dp),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = if (isSystemInDarkTheme()) EditorMenuDark else EditorMenuLight,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = { EditorSheetDragHandle() },
     ) {
@@ -753,7 +751,9 @@ private fun SortTriggerRow(
     currentSortType: ShoppingItemSort,
     onClick: () -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxWidth().height(56.dp)) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(56.dp)) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -939,7 +939,9 @@ private fun ContextMenuItem(
     showDivider: Boolean,
     onClick: () -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxWidth().height(56.dp)) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(56.dp)) {
         Row(
             modifier = Modifier
                 .fillMaxSize()

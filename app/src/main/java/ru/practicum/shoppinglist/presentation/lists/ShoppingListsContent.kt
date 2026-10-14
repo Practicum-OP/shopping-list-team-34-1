@@ -713,7 +713,7 @@ private fun ShoppingListCard(
         modifier = modifier.fillMaxWidth().height(56.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = onItemClick,
