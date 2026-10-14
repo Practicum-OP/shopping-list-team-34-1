@@ -1,0 +1,30 @@
+complexity:
+  LargeClass:
+    active: true
+    allowedLines: 350
+
+  LongMethod:
+    active: true
+    allowedLines: 50
+
+  LongParameterList:
+    active: true
+    allowedFunctionParameters: 5
+    allowedConstructorParameters: 5
+    ignoreDefaultParameters: false
+    ignoreDataClasses: true
+
+  CyclomaticComplexMethod:
+    active: false
+
+  TooManyFunctions:
+    active: false
+
+style:
+  ReturnCount:
+    active: false
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - Composable

@@ -1,3 +1,87 @@
 <resources>
-    <string name="app_name">ShoppingList</string>
+    <string name="app_name">Список покупок</string>
+
+    <string name="editor_title">Список</string>
+    <string name="editor_operation_failed">Операция не удалась</string>
+
+    <string name="editor_empty_title">В списке покупок пока пусто</string>
+    <string name="editor_empty_subtitle">Нажмите на кнопку + ниже,\nчтобы добавить товары</string>
+
+    <string name="editor_create">Добавить товар</string>
+    <string name="action_add">Добавить</string>
+    <string name="action_edit">Изменить</string>
+
+    <string name="action_yes">Да</string>
+
+    <string name="editor_create_dialog_title">Новый товар</string>
+    <string name="editor_edit_dialog_title">Редактировать</string>
+    <string name="editor_name_label">Товар</string>
+    <string name="editor_product_placeholder">Добавить новый товар</string>
+    <string name="editor_decrease_quantity">Уменьшить количество</string>
+    <string name="editor_increase_quantity">Увеличить количество</string>
+    <string name="editor_name_required">Введите название товара</string>
+    <string name="editor_quantity_label">Количество</string>
+    <string name="editor_quantity_required">Введите количество</string>
+
+    <string name="editor_delete_dialog_title">Удалить товар?</string>
+    <string name="editor_delete_dialog_body">Вы уверены, что хотите удалить \"%s\"?</string>
+
+    <string name="editor_clear_dialog_title">Удалить все товары?</string>
+    <string name="editor_clear_dialog_body">Вы уверены, что хотите удалить все товары из этого списка?</string>
+    <string name="editor_clear_purchased_dialog_title">Удалить все купленные товары?</string>
+    <string name="editor_clear_purchased_dialog_body">Вы уверены, что хотите удалить все купленные товары из этого списка?</string>
+    <string name="navigate_back">Назад</string>
+
+
+    <string name="editor_unit_label">Единицы</string>
+    <string name="unit_piece_short">шт</string>
+    <string name="unit_kilogram_short">кг</string>
+    <string name="unit_liter_short">л</string>
+    <string name="unit_milliliter_short">мл</string>
+    <string name="unit_gram_short">г</string>
+
+    <string name="item_purchased">Товар куплен</string>
+    <string name="item_not_purchased">Товар не куплен</string>
+    <string name="drag_handle">Перетащить</string>
+    <string name="menu">Меню</string>
+
+    <string name="sort_manual">Пользовательская</string>
+    <string name="sort_alphabetical">По алфавиту</string>
+
+    <string name="login_title">Список покупок</string>
+    <string name="login_subtitle">Войдите, чтобы продолжить</string>
+
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Пароль</string>
+    <string name="auth_email_error">Введите корректный email</string>
+    <string name="auth_password_error">Пароль должен содержать не менее 7 символов</string>
+    <string name="auth_show_password">Показать пароль</string>
+    <string name="auth_hide_password">Скрыть пароль</string>
+
+    <string name="login_action">Войти</string>
+    <string name="registration_action">Зарегистрироваться</string>
+    <string name="password_recovery_action">Восстановить пароль</string>
+
+    <string name="auth_error_invalid_data">Проверьте введённые данные</string>
+    <string name="auth_error_user_already_exists">Пользователь с таким email уже существует</string>
+    <string name="auth_error_invalid_credentials">Неверный email или пароль</string>
+    <string name="auth_error_network">Нет подключения к интернету</string>
+    <string name="auth_error_server">Ошибка сервера. Попробуйте позже</string>
+    <string name="auth_error_unknown">Не удалось выполнить операцию</string>
+
+    <string name="registration_title">Регистрация</string>
+    <string name="registration_subtitle">Создайте аккаунт, чтобы сохранять списки покупок</string>
+    <string name="auth_repeat_password_label">Повторите пароль</string>
+    <string name="auth_passwords_mismatch">Пароли не совпадают</string>
+    <string name="auth_navigate_back">Назад</string>
+
+    <string name="password_recovery_title">Восстановление пароля</string>
+    <string name="password_recovery_subtitle">Укажите email, использованный при регистрации</string>
+    <string name="password_recovery_submit">Отправить письмо для восстановления пароля</string>
+    <string name="password_recovery_success">Запрос на восстановление пароля отправлен</string>
+
+    <string name="auth_logout">Выйти из аккаунта</string>
+    <string name="editor_clear_purchased">Очистить купленные</string>
+    <string name="editor_delete_all">Удалить все</string>
+    <string name="sort_title">Сортировка</string>
 </resources>

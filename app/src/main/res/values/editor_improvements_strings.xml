@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="drag_handle_item">Изменить позицию товара «%1$s»</string>
+    <string name="drag_move_up">Переместить выше</string>
+    <string name="drag_move_down">Переместить ниже</string>
+</resources>
