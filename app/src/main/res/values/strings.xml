@@ -18,6 +18,7 @@
     <string name="editor_name_label">Товар</string>
     <string name="editor_product_placeholder">Добавить новый товар</string>
     <string name="editor_decrease_quantity">Уменьшить количество</string>
+    <string name="editor_increase_quantity">Увеличить количество</string>
     <string name="editor_name_required">Введите название товара</string>
     <string name="editor_quantity_label">Количество</string>
     <string name="editor_quantity_required">Введите количество</string>
